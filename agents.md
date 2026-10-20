@@ -1,45 +1,165 @@
-# Log do agente: tarefa1 (migração Netlify → GitHub Pages)
+# Think Before Coding
 
-Status: **CONCLUÍDO na branch `migracao-github-pages` (sem merge, sem push).**
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-## Passo 0: Varredura de segredos (resultado, no topo)
+Before implementing:
 
-- `.env` local contém **valores reais** (`KEYSTATIC_SECRET`, `KEYSTATIC_GITHUB_APP_ID`, `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_APP_CLIENT_SECRET`, `KEYSTATIC_GITHUB_APP_PRIVATE_KEY`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`, `KEYSTATIC_REPO_OWNER`, `KEYSTATIC_REPO_NAME`). Está no `.gitignore`, **nunca foi commitado** (conferido em `git ls-files` e no histórico) e não foi alterado.
-- **ALERTA (erro do agente):** numa listagem anterior, o comando imprimiu na saída da sessão as linhas da `KEYSTATIC_GITHUB_APP_PRIVATE_KEY`. Considere a chave **exposta**: no GitHub App do Keystatic, gere uma nova chave privada e revogue a antiga. Nada foi gravado em arquivo.
-- Árvore final (exceto `src/content`, `public/uploads`, que não foram lidos por instrução): só há **nomes** de variáveis/padrões em textos (ex.: `tarefa1.md`), nenhum valor. Histórico tinha 1 commit, sem `.env`, `.pem` ou `.key`.
-- Busca por texto (plano B); gitleaks/trufflehog não usados. Isso reduz o risco, não o elimina.
-- Como o `.env` nunca entrou no git, o repo é seguro para tornar público quanto a isso; a chave deve ser trocada de qualquer forma.
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-## Diagnóstico (Passo 1)
+# Simplicity First
 
-- Astro `^7.3.8`, `@keystatic/core ^0.6.9`, `@keystatic/astro ^6.0.0`, npm. Antes: `output: 'server'` + `@astrojs/netlify`, Keystatic storage `github` em PROD.
-- `createReader` em `src/lib/noticias.ts` (não alterado), usado por `noticias/index.astro` e `noticias/[slug].astro` (`prerender = true`).
-- Sem SSR real, middleware, Actions, `_redirects`, `_headers` ou domínio próprio. Repo de projeto: `https://denilson48mgok-oss.github.io/o_estrangeiro/` (**o nome do repo `o_estrangeiro` foi tirado do config antigo do Keystatic; não há `git remote`. Confirme.**).
+**Minimum code that solves the problem. Nothing speculative.**
 
-## O que foi alterado / removido (commits na branch)
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-- Removidos: `netlify.toml`, `@astrojs/netlify` (e lockfile atualizado).
-- `astro.config.mjs`: `output: 'static'`, `site`, `base: '/o_estrangeiro/'`, `keystatic()` só quando `astro dev`; `react()` e `markdoc()` sempre ligados.
-- `keystatic.config.ts`: `storage: { kind: 'local' }`; removidos `repo` e a cópia de `process.env`. Coleções intactas.
-- Formulário de contato: Netlify Forms trocado por **FormSubmit** (grátis, sem conta, envia direto ao e-mail de `ownerData.contact.email`), com honeypot `_honey` e redirecionamento para `contato/sucesso`. **O primeiro envio após publicar dispara um e-mail de ativação; o dono precisa clicar no link.**
-- `Base.astro`: `og:image` de fallback agora usa `base` (único ajuste de design/links necessário).
-- `.gitignore`: agora cobre `.env.*` (exceto `.env.example`). `.env.example` sem variáveis.
-- Novos: `.github/workflows/deploy.yml`, `README.md`.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-## Verificação (Passo 7)
+# Surgical Changes
 
-1. `npm ci` do zero + `npm run build`, sem `KEYSTATIC_*` no ambiente: **passou** (11 páginas).
-2. `dist/` sem `keystatic`/`api/keystatic`: **ok** (0 arquivos).
-3. `astro preview` com `/o_estrangeiro/`: home, notícias, notícia, contato, favicon e logo retornam 200. Notícias: **6 geradas em `dist/` = 6 em `src/content/noticias/`**.
-4. `astro dev`: `/keystatic` e `/keystatic/collection/noticias` retornam 200 (não abri o navegador para ver a lista de posts).
-5. Restos de `netlify`/`KEYSTATIC_GITHUB`/`kind: 'github'`: nenhum, fora de `.gitignore` (`.netlify/`, inofensivo), `.agyignore.md` e das próprias tarefas.
-6. Varredura final de segredos: nada novo.
+**Touch only what you must. Clean up only your own mess.**
 
-## Passos manuais do dono
+When editing existing code:
 
-1. **Revogar e gerar nova chave privada** do GitHub App (ver alerta).
-2. Confirmar o nome do repo no GitHub (`o_estrangeiro`) e `git remote add origin ...`; se for outro, ajustar `base` em `astro.config.mjs`.
-3. GitHub: **Settings → Pages → Source → GitHub Actions**.
-4. Fazer merge da branch na `main` e conferir se o workflow publicou.
-5. Só depois: desligar o site no Netlify e apagar o GitHub App do Keystatic.
-6. Clicar no link de ativação do FormSubmit no primeiro envio de teste.
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+# Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+# Style Guide
+
+- Not defined here. For now, follow the same conventions and patterns that you detect in the surrounding code.
+- Keep formatting consistent. Our rules are defined in our [biome.jsonc](./biome.jsonc) file, enforced by Biome.
+- Run `pnpm format` to auto-format the entire repo.
+- Run `pnpm lint:ai` to lint the entire repo.
+
+# Writing Comments
+
+These rules apply to **every** comment you write, including ones added incidentally while fixing a bug. Full guidance with examples: [`.agents/skills/writing-comments/SKILL.md`](./.agents/skills/writing-comments/SKILL.md).
+
+- Write for a contributor reading the code at HEAD, months later, with no access to this conversation, the PR, or the diff.
+- Never narrate change history ("now", "previously", "no longer") and never address the reviewer ("this correctly handles..."). State how the code works, not how it came to be or why the change is right.
+- Deletion test: a comment must state something the reader cannot recover from the code. If names or types already carry it, don't write it.
+- `/** */` docs state the contract (behavior, params, returns, throws); `//` comments carry rationale only. Anchor a workaround to the GitHub issue or PR that motivates it.
+- When your change alters documented behavior, extend or correct the existing prose — never replace specific docs with generic text.
+- Exception: `@docs`-tagged JSDoc in `types/public/config.ts` and `core/errors/errors-data.ts` is end-user documentation generated to the website; these rules don't apply there.
+
+# Environment Guide
+
+- Use `node -e` for scripting tasks, not `python` or `python3`.
+
+# Monorepo Structure
+
+This directory is a Git monorepo containing a `pnpm` workspace:
+
+- The codebase is primarily TypeScript.
+- All packages live in `packages/`.
+- Integration packages live in `packages/integrations/`.
+- The core Astro package is `packages/astro`.
+
+In error stack traces, built files from workspace packages in `node_modules/` map to TypeScript source in `packages/`:
+
+- `node_modules/astro/dist/...` → `packages/astro/src/...`
+- `node_modules/@astrojs/react/...` → `packages/integrations/react/src/...`
+
+Edits to source files take effect after rebuilding the package via `pnpm build`.
+
+Use `pnpm -C <dir> <command>` for project-local script commands when working in packages/examples/triage directories (Example: `pnpm -C packages/astro build`, `pnpm -C examples/blog dev`). Only omit `-C` flag when intentionally working in the monorepo root (Example: `pnpm format`, `pnpm lint:ai`, `pnpm test:types`).
+
+# Running Tests
+
+- Run `pnpm test` in workspace root or package directory to run full test suite (can be slow!)
+- Integration tests live in special `packages/integrations` folders.
+- Example: `pnpm -C <package-directory> exec astro-scripts test` - Run a single package test suite
+- Example: `pnpm -C <package-directory> exec astro-scripts test "test/actions.test.js"` - Run a single test file
+- Example: `pnpm -C <package-directory> exec astro-scripts test "test/**/*.test.js" --match "CSS"` - Run specific tests matching a string or regex patterns
+- Example: `pnpm -C <package-directory> exec astro-scripts test "test/{actions,css,middleware}.test.js"` - Run multiple test files
+- Key flags:
+  - `--match` / `-m`: Filter tests by name pattern (regex)
+  - `--only` / `-o`: Run only tests marked with `.only`
+  - `--parallel` / `-p`: Run tests in parallel (default is sequential)
+  - `--timeout` / `-t`: Set timeout in milliseconds
+  - `--watch` / `-w`: Watch mode
+
+# Astro Quick Reference
+
+- Use `astro dev` to start the local dev server with HMR. Do not use other web servers (`python -m http.server`, etc.).
+- Use `astro build` to create a production build in `dist/`, by default.
+- Use `astro preview` to serve the production build locally. Do not use other web servers (`python -m http.server`, etc.).
+- Use `astro check` to run type checking and diagnostics.
+- Use `astro sync` to generate and update TypeScript types.
+- Use `astro add` to install and configure an official integration.
+- Fetch **Full docs** at https://docs.astro.build/ (primary source for the latest reference).
+
+# Background Dev Servers
+
+Use `astro dev --background` to start and manage long-running dev servers in the background. Do not manually start detached servers with `&`.
+
+Workflow:
+
+1. `pnpm -C examples/minimal dev --background` - Start the dev server in the background
+2. `pnpm -C examples/minimal dev logs` - View logs from the dev server. Useful for debugging server logs.
+3. `pnpm -C examples/minimal dev status` - Check whether a dev server is running
+4. `pnpm -C examples/minimal dev stop` - Stop the dev server when your work is complete
+
+Use `pnpm -C examples/minimal dev logs --follow` to stream logs. If a stale dev server is blocking startup, stop it first or use `pnpm -C examples/minimal dev --background --force` to replace it.
+
+# `agent-browser`
+
+Use `agent-browser` for web automation or when UI interaction, long-running browsers, or HMR testing is required. Do not use `curl` to test HMR issues.
+
+Use `agent-browser --help` to see all available commands.
+
+Workflow:
+
+1. `agent-browser open <url>` - Navigate to page
+2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
+3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
+4. Re-snapshot after all page changes, navigations, interactions.
+
+Note: `agent-browser` should be installed globally, and is not a dependency of this monorepo. If `agent-browser` isn't available on this machine, ask the user to run `npm install -g agent-browser && agent-browser install`. If you are running in headless mode with no human operator and need this tool to complete your job, it is best to fail the job vs. trying to work around not having the tool.
+
+# Deep Dives
+
+Detailed reference documents on specific subsystems. Read the relevant section before diving into a bug or feature in that area.
+
+## Unit Testing
+
+When writing unit tests, read [`reference/unit-testing.md`](./reference/unit-testing.md) for conventions, file placement, and the shared test utilities and mocks available in the repo. Do not duplicate existing helpers.
+
+## Vite Dep Optimizer (`optimizeDeps`)
+
+When a bug works in `astro build` but fails in `astro dev` with errors like `require is not defined`, the root cause is almost always Vite's dep optimizer failing to pre-bundle a CJS dependency. `astro build` uses Vite's Rolldown-based build and handles CJS→ESM reliably. `astro dev` relies on Rolldown's optimizer scan, which is intentionally shallow and will miss deps that are only reachable through non-JS files (like `.astro` components in `node_modules`). The key files are `packages/astro/src/vite-plugin-environment/index.ts` (sets `optimizeDeps.entries`) and `packages/astro/src/core/create-vite.ts` (wires up `vitefu`/`crawlFrameworkPkgs`). For a full deep-dive including a debugging playbook and potential fixes, see [`reference/optimize-deps.md`](./reference/optimize-deps.md).

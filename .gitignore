@@ -3,6 +3,8 @@ node_modules/
 dist/
 .astro/
 .netlify/
+tasks/
+agents.md
 
 # Variáveis de ambiente
 .env
@@ -20,3 +22,4 @@ pnpm-debug.log*
 Thumbs.db
 
 context.md
+agents.md
