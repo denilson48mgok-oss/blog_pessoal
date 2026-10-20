@@ -7,6 +7,7 @@
 :root {
   --color-primary: #1e3a8a;
   --color-secondary: #b45309;
+  --color-accent: #e8593c;
   --color-background: #f8fafc;
   --color-surface: #ffffff;
   --color-text: #1e293b;
@@ -23,6 +24,7 @@
 @theme {
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
   --color-background: var(--color-background);
   --color-surface: var(--color-surface);
   --color-text: var(--color-text);

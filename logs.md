@@ -52,3 +52,26 @@ Data: 2026-10-20
 Resumo: novo componente `src/components/TextResizer.astro` (botão "Aa" com aria-expanded/aria-controls + painel com `input[type=range]` 80-140, passo 5, padrão 100, rótulos A-/A+ e valor em %). O slider define `--font-scale` em `.conteudo-noticia` em tempo real, persiste em `localStorage` (`blog:font-scale`) e reexecuta em `astro:page-load`. Estilos usam as variáveis de `global.css` (sem modo escuro no projeto) e alvos de toque de 44px. Em `src/pages/noticias/[slug].astro`: componente na linha de data/metadados e `font-size` de p, li, h2, h3 e blockquote multiplicado por `var(--font-scale, 1)`.
 
 Verificação: `astro build` falha com NoAdapterInstalled, e falha igual sem as minhas alterações (conferido com git stash). Teste manual no navegador não feito.
+
+
+# Log do agente: task 5 (refinamento visual e posicionamento responsivo do "Aa")
+
+Data: 2026-10-20
+
+Resumo do que foi realizado:
+1. `src/styles/global.css`:
+   - Adicionada a variável de cor de destaque `--color-accent: #e8593c;` em `:root` e no `@theme` para atender à especificação da tipografia "Aa" na cor laranja/coral do design system.
+
+2. `src/components/TextResizer.astro`:
+   - Refatoração da estrutura visual no formato de cápsula/pílula (`border-radius: 9999px;` e sombra suave).
+   - Desktop (>= 1024px): Botão em formato de cápsula vertical com a inscrição "Aa" e traço horizontal sutil abaixo. Ao abrir, o painel do slider se projeta em flyout lateral direito flutuante, sem desalinhar ou empurrar o texto do artigo.
+   - Mobile (< 1024px): Cápsula horizontal com inscrição "Aa" e linha divisória vertical fina. Ao clicar, expande suavemente na horizontal revelando o controle deslizante e marcadores ("A-", slider, "A+").
+   - Preservados e aprimorados: acessibilidade ARIA, persistência em `localStorage` (`blog:font-scale`), manipulação dinâmica de `--font-scale`, fechamento acessível ao clicar fora ou pressionar `Escape`, e reexecução em `astro:page-load`.
+
+3. `src/pages/noticias/[slug].astro`:
+   - Estruturação do layout com `.article-layout-container`, `<aside class="resizer-aside">` e `<div class="conteudo-noticia article-content">`.
+   - Desktop (>= 1024px): Aside em rail lateral fixo na rolagem (`position: sticky; top: 6rem; align-self: flex-start;`) alinhado à esquerda do texto.
+   - Mobile (< 1024px): Posicionado no fluxo normal imediatamente antes do primeiro parágrafo do artigo.
+
+Verificação:
+- Executado `npm run build` com sucesso (código 0, 11 páginas estáticas geradas com sucesso).

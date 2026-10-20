@@ -1,195 +1,254 @@
 ---
-// Controle de tamanho da fonte do artigo (botão "Aa" + slider).
-// Aplica --font-scale em .conteudo-noticia e persiste o valor em localStorage.
+// src/components/TextResizer.astro
+// Controle de redimensionamento tipográfico com suporte responsivo a dock vertical sticky (desktop)
+// e cápsula horizontal expansível (mobile), consumindo tokens de src/styles/global.css.
 ---
 
-<div class="text-resizer-wrapper">
+<div class="text-resizer-container" id="text-resizer">
+  <!-- Botão Gatilho -->
   <button
-    id="resizer-toggle"
-    class="resizer-toggle-btn"
+    id="resizer-toggle-btn"
+    class="pill-trigger"
     type="button"
     aria-expanded="false"
-    aria-controls="font-slider-container"
+    aria-controls="resizer-slider-panel"
     aria-label="Ajustar tamanho da fonte"
   >
-    Aa
+    <span class="aa-label">Aa</span>
+    <span class="pill-divider" aria-hidden="true"></span>
   </button>
 
-  <div
-    id="font-slider-container"
-    class="slider-panel"
-    role="region"
-    aria-label="Controle de tamanho de texto"
-  >
-    <span class="indicator-small" aria-hidden="true">A-</span>
+  <!-- Painel Deslizante -->
+  <div id="resizer-slider-panel" class="slider-drawer closed" role="region" aria-label="Controle de escala de texto">
+    <span class="size-hint small" aria-hidden="true">A-</span>
     <input
       type="range"
-      id="font-slider"
-      min="80"
+      id="font-range-input"
+      min="85"
       max="140"
       step="5"
       value="100"
-      aria-label="Escala do tamanho do texto em porcentagem"
+      aria-label="Tamanho da fonte em porcentagem"
     />
-    <span class="indicator-large" aria-hidden="true">A+</span>
-    <output id="font-slider-value" class="slider-value" for="font-slider">100%</output>
+    <span class="size-hint large" aria-hidden="true">A+</span>
   </div>
 </div>
 
 <script>
-  const STORAGE_KEY = 'blog:font-scale';
+  function initTextResizer() {
+    const toggleBtn = document.getElementById('resizer-toggle-btn');
+    const panel = document.getElementById('resizer-slider-panel');
+    const slider = document.getElementById('font-range-input') as HTMLInputElement | null;
+    const article = (document.querySelector('.article-content') || document.querySelector('.conteudo-noticia')) as HTMLElement | null;
 
-  function setupFontResizer() {
-    const toggleBtn = document.getElementById('resizer-toggle');
-    const panel = document.getElementById('font-slider-container');
-    const slider = document.getElementById('font-slider') as HTMLInputElement | null;
-    const valueLabel = document.getElementById('font-slider-value');
-    const article = document.querySelector('.conteudo-noticia') as HTMLElement | null;
+    if (!toggleBtn || !panel || !slider || !article) return;
 
-    if (!toggleBtn || !panel || !slider || !valueLabel || !article) return;
+    // Restaurar preferência do usuário
+    const savedScale = localStorage.getItem('blog:font-scale') || '100';
+    slider.value = savedScale;
+    article.style.setProperty('--font-scale', `${Number(savedScale) / 100}`);
 
-    const applyScale = (value: string) => {
-      article.style.setProperty('--font-scale', String(Number(value) / 100));
-      valueLabel.textContent = `${value}%`;
+    // Alternar abertura do slider
+    toggleBtn.onclick = (e) => {
+      e.stopPropagation();
+      const isClosed = panel.classList.contains('closed');
+      panel.classList.toggle('closed', !isClosed);
+      toggleBtn.setAttribute('aria-expanded', String(isClosed));
     };
 
-    const savedScale = localStorage.getItem(STORAGE_KEY);
-    const isValid =
-      savedScale !== null &&
-      Number(savedScale) >= Number(slider.min) &&
-      Number(savedScale) <= Number(slider.max);
-    slider.value = isValid ? savedScale : '100';
-    applyScale(slider.value);
-
-    toggleBtn.onclick = () => {
-      const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-      toggleBtn.setAttribute('aria-expanded', String(!isExpanded));
-      panel.classList.toggle('open', !isExpanded);
+    panel.onclick = (e) => {
+      e.stopPropagation();
     };
 
-    slider.oninput = () => {
-      applyScale(slider.value);
-      localStorage.setItem(STORAGE_KEY, slider.value);
+    // Atualização em tempo real
+    slider.oninput = (e) => {
+      const value = (e.target as HTMLInputElement).value;
+      article.style.setProperty('--font-scale', `${Number(value) / 100}`);
+      localStorage.setItem('blog:font-scale', value);
     };
   }
 
-  setupFontResizer();
-  document.addEventListener('astro:page-load', setupFontResizer);
+  // Fechar ao clicar fora ou ao pressionar Escape
+  document.addEventListener('click', () => {
+    const panel = document.getElementById('resizer-slider-panel');
+    const toggleBtn = document.getElementById('resizer-toggle-btn');
+    if (panel && !panel.classList.contains('closed')) {
+      panel.classList.add('closed');
+      toggleBtn?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const panel = document.getElementById('resizer-slider-panel');
+      const toggleBtn = document.getElementById('resizer-toggle-btn');
+      if (panel && !panel.classList.contains('closed')) {
+        panel.classList.add('closed');
+        toggleBtn?.setAttribute('aria-expanded', 'false');
+        toggleBtn?.focus();
+      }
+    }
+  });
+
+  initTextResizer();
+  document.addEventListener('astro:page-load', initTextResizer);
 </script>
 
 <style>
-  .text-resizer-wrapper {
-    display: flex;
-    flex-wrap: wrap;
+  .text-resizer-container {
+    position: relative;
+    display: inline-flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    max-width: 100%;
+    background: var(--color-surface, var(--bg-surface, #ffffff));
+    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 9999px;
+    padding: 0.25rem 0.5rem;
+    transition: all 0.25s ease;
+    user-select: none;
   }
 
-  .resizer-toggle-btn {
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0 0.75rem;
-    font-family: var(--font-heading);
-    font-size: 1rem;
+  .pill-trigger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    color: var(--color-accent, var(--color-primary, #e8593c));
     font-weight: 700;
-    color: var(--color-text-muted);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 0.375rem;
+    font-size: 1.125rem;
+    font-family: var(--font-heading, inherit);
+    line-height: 1;
+    outline: none;
+    border-radius: 9999px;
+    transition: opacity 0.2s ease;
+  }
+
+  .pill-trigger:hover .aa-label {
+    opacity: 0.85;
+  }
+
+  .pill-trigger:focus-visible {
+    outline: 2px solid var(--color-accent, var(--color-primary, #e8593c));
+    outline-offset: 2px;
+  }
+
+  .pill-divider {
+    background-color: var(--color-border, var(--border-color, #e2e8f0));
+    transition: all 0.2s ease;
+  }
+
+  /* --- MOBILE: Formato Horizontal (Foto 2) --- */
+  @media (max-width: 1023px) {
+    .text-resizer-container {
+      flex-direction: row;
+      height: 40px;
+    }
+
+    .pill-trigger {
+      flex-direction: row;
+      gap: 0.5rem;
+      height: 100%;
+    }
+
+    /* Linha divisória vertical (Foto 2) */
+    .pill-divider {
+      width: 1px;
+      height: 18px;
+    }
+
+    .slider-drawer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      overflow: hidden;
+      max-width: 260px;
+      opacity: 1;
+      padding-left: 0.5rem;
+      padding-right: 0.25rem;
+      transition: max-width 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+    }
+
+    .slider-drawer.closed {
+      max-width: 0;
+      opacity: 0;
+      padding-left: 0;
+      padding-right: 0;
+      pointer-events: none;
+    }
+  }
+
+  /* --- DESKTOP: Formato Vertical Sticky (Foto 1) --- */
+  @media (min-width: 1024px) {
+    .text-resizer-container {
+      flex-direction: column;
+      width: 48px;
+      padding: 0.6rem 0.25rem;
+    }
+
+    .pill-trigger {
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 0.25rem 0;
+      width: 100%;
+    }
+
+    /* Traço horizontal (Foto 1) */
+    .pill-divider {
+      width: 22px;
+      height: 1px;
+    }
+
+    /* Painel do slider abre como flyout lateral */
+    .slider-drawer {
+      position: absolute;
+      left: calc(100% + 0.75rem);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--color-surface, var(--bg-surface, #ffffff));
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--color-border, #e2e8f0);
+      border-radius: 9999px;
+      padding: 0.5rem 0.85rem;
+      white-space: nowrap;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 50;
+    }
+
+    .slider-drawer.closed {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-50%) translateX(-8px);
+    }
+  }
+
+  /* Controles internos */
+  .size-hint {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #64748b);
+    user-select: none;
+    line-height: 1;
+  }
+
+  .size-hint.large {
+    font-size: 0.95rem;
+  }
+
+  input[type="range"] {
+    accent-color: var(--color-accent, var(--color-primary, #e8593c));
     cursor: pointer;
-    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-  }
-
-  .resizer-toggle-btn:hover,
-  .resizer-toggle-btn[aria-expanded='true'] {
-    color: var(--color-primary);
-    background: var(--color-surface);
-    border-color: var(--color-border);
-  }
-
-  .slider-panel {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-    padding: 0 0.75rem;
-    color: var(--color-text-muted);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.375rem;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-4px);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-  }
-
-  .slider-panel.open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-
-  .indicator-small {
-    font-size: 0.8rem;
-  }
-
-  .indicator-large {
-    font-size: 1.2rem;
-  }
-
-  .slider-value {
-    min-width: 3.5ch;
-    font-family: var(--font-abstract);
-    font-size: 0.8rem;
-    text-align: right;
-  }
-
-  input[type='range'] {
-    flex: 1 1 8rem;
-    min-width: 0;
-    width: 10rem;
-    height: 44px;
-    margin: 0;
-    background: transparent;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-
-  input[type='range']::-webkit-slider-runnable-track {
     height: 4px;
-    background: var(--color-border);
-    border-radius: 9999px;
+    width: 100px;
   }
 
-  input[type='range']::-moz-range-track {
-    height: 4px;
-    background: var(--color-border);
-    border-radius: 9999px;
-  }
-
-  input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    margin-top: -8px;
-    background: var(--color-primary);
-    border: 2px solid var(--color-surface);
-    border-radius: 9999px;
-  }
-
-  input[type='range']::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: var(--color-primary);
-    border: 2px solid var(--color-surface);
-    border-radius: 9999px;
-  }
-
-  input[type='range']:focus-visible {
-    outline: 2px solid var(--color-primary);
+  input[type="range"]:focus-visible {
+    outline: 2px solid var(--color-accent, var(--color-primary, #e8593c));
     outline-offset: 2px;
   }
 </style>

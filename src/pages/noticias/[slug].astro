@@ -131,12 +131,15 @@ const imagemUrl = noticia?.imagem
             />
           </figure>
         )}
-        <div class="ml-auto">
-          <TextResizer />
-        </div>
-        {/* Conteúdo Markdoc */}
-        <div class="conteudo-noticia mt-10">
-          <Fragment set:html={conteudoHtml} />
+        {/* Layout do Conteúdo e Redimensionador Responsivo */}
+        <div class="article-layout-container mt-10">
+          <aside class="resizer-aside">
+            <TextResizer />
+          </aside>
+
+          <div class="conteudo-noticia article-content">
+            <Fragment set:html={conteudoHtml} />
+          </div>
         </div>
 
         {/* Rodapé do Artigo */}
@@ -150,7 +153,7 @@ const imagemUrl = noticia?.imagem
               <span>Ler outras notícias</span>
             </a>
             <span class="text-xs font-abstract text-textMuted">
-              Publicado pela {ownerData.author.name}
+              Publicado por {ownerData.author.name}
             </span>
           </div>
         </footer>
@@ -166,6 +169,45 @@ const imagemUrl = noticia?.imagem
     Nota: Certifique-se de que as variáveis CSS (--color-*, --font-*) estejam 
     definidas no seu :root ou global.css, ou substitua pelos códigos hex.
   */
+
+  /* Layout do artigo e posicionamento responsivo do TextResizer */
+  .article-layout-container {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Mobile first: no fluxo normal, logo antes do início do texto */
+  .resizer-aside {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  /* Desktop: sticky rail lateral fixo à esquerda do corpo do texto */
+  @media (min-width: 1024px) {
+    .article-layout-container {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      column-gap: 2rem;
+      margin-left: calc(-48px - 2rem);
+      width: calc(100% + 48px + 2rem);
+    }
+
+    .resizer-aside {
+      position: sticky;
+      top: 6rem;
+      height: fit-content;
+      margin-bottom: 0;
+      justify-content: center;
+      align-self: flex-start;
+      z-index: 30;
+    }
+  }
+
+  .article-content {
+    --font-scale: 1;
+  }
 
   /* DICA 1 APLICADA: Respiração e Altura de Linha */
   .conteudo-noticia :global(p) {
