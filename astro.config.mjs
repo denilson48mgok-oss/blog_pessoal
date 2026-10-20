@@ -12,7 +12,7 @@ const isDev = process.argv.includes('dev');
 export default defineConfig({
   site: 'https://denilson48mgok-oss.github.io',
   base: '/', // O keystatic precisa de uma '/'. É uma issue #1170 no github "Keystatic's admin cant run under a base path yet"
-  output: 'server',
+  output: 'static',
   integrations: [
     react(),
     markdoc(),

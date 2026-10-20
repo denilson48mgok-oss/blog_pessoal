@@ -4,6 +4,7 @@ import Base from '@/layouts/Base.astro';
 import { ownerData } from '@/data/owner_data';
 import { listarNoticias, obterNoticia, gerarResumo } from '@/lib/noticias';
 import Markdoc from '@markdoc/markdoc';
+import TextResizer from '@/components/TextResizer.astro';
 
 // Pré-renderizado no build: em produção, a função serverless não encontra src/content no disco.
 export const prerender = true;
@@ -105,6 +106,7 @@ const imagemUrl = noticia?.imagem
             <span class="text-xs font-semibold uppercase tracking-[0.1em] text-textMuted">
               {ownerData.siteName}
             </span>
+
           </div>
 
           <h1 class="font-heading text-4xl font-bold leading-[1.15] text-heading sm:text-5xl lg:text-6xl">
@@ -129,7 +131,9 @@ const imagemUrl = noticia?.imagem
             />
           </figure>
         )}
-
+        <div class="ml-auto">
+          <TextResizer />
+        </div>
         {/* Conteúdo Markdoc */}
         <div class="conteudo-noticia mt-10">
           <Fragment set:html={conteudoHtml} />
@@ -168,12 +172,12 @@ const imagemUrl = noticia?.imagem
     margin-bottom: 1.75rem; /* Espaço generoso entre parágrafos */
     line-height: 1.7; /* O ponto ideal: nem muito apertado, nem solto demais */
     color: var(--color-text, #2b2a28);
-    font-size: 1.125rem; /* 18px para leitura confortável em telas */
+    font-size: calc(1.125rem * var(--font-scale, 1)); /* 18px para leitura confortável em telas */
   }
 
   .conteudo-noticia :global(h2) {
     font-family: var(--font-heading, 'Newsreader', serif);
-    font-size: 1.75rem;
+    font-size: calc(1.75rem * var(--font-scale, 1));
     font-weight: 700;
     color: var(--color-heading, #14110f);
     margin-top: 3rem; /* Muito espaço acima para separar seções */
@@ -183,7 +187,7 @@ const imagemUrl = noticia?.imagem
 
   .conteudo-noticia :global(h3) {
     font-family: var(--font-heading, 'Newsreader', serif);
-    font-size: 1.4rem;
+    font-size: calc(1.4rem * var(--font-scale, 1));
     font-weight: 600;
     color: var(--color-heading, #14110f);
     margin-top: 2.5rem;
@@ -199,6 +203,7 @@ const imagemUrl = noticia?.imagem
   }
 
   .conteudo-noticia :global(li) {
+    font-size: calc(1rem * var(--font-scale, 1));
     margin-bottom: 0.6rem;
     line-height: 1.7;
   }
@@ -219,7 +224,7 @@ const imagemUrl = noticia?.imagem
     
     /* Tipografia Literária */
     font-family: var(--font-body, 'Lora', serif);
-    font-size: 1.2rem; /* Ligeiramente maior que o parágrafo normal para destaque */
+    font-size: calc(1.2rem * var(--font-scale, 1)); /* Ligeiramente maior que o parágrafo normal para destaque */
     font-style: italic;
     line-height: 1.7;
     color: var(--color-heading, #14110f); /* Preto tabaco para máxima elegância e contraste */

@@ -43,3 +43,12 @@ Status: **CONCLUÍDO na branch `migracao-github-pages` (sem merge, sem push).**
 4. Fazer merge da branch na `main` e conferir se o workflow publicou.
 5. Só depois: desligar o site no Netlify e apagar o GitHub App do Keystatic.
 6. Clicar no link de ativação do FormSubmit no primeiro envio de teste.
+
+
+# Log do agente: task 4 (redimensionamento de fonte "Aa")
+
+Data: 2026-10-20
+
+Resumo: novo componente `src/components/TextResizer.astro` (botão "Aa" com aria-expanded/aria-controls + painel com `input[type=range]` 80-140, passo 5, padrão 100, rótulos A-/A+ e valor em %). O slider define `--font-scale` em `.conteudo-noticia` em tempo real, persiste em `localStorage` (`blog:font-scale`) e reexecuta em `astro:page-load`. Estilos usam as variáveis de `global.css` (sem modo escuro no projeto) e alvos de toque de 44px. Em `src/pages/noticias/[slug].astro`: componente na linha de data/metadados e `font-size` de p, li, h2, h3 e blockquote multiplicado por `var(--font-scale, 1)`.
+
+Verificação: `astro build` falha com NoAdapterInstalled, e falha igual sem as minhas alterações (conferido com git stash). Teste manual no navegador não feito.
