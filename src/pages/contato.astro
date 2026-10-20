@@ -1,13 +1,15 @@
 ---
-// Página de contato da Revista Codorninha com integração ao Netlify Forms.
-// Suporta envio identificado ou anônimo e é pré-renderizada para detecção estática do Netlify.
+// Página de contato da Revista Codorninha com envio via FormSubmit (serviço gratuito, sem servidor próprio).
+// Suporta envio identificado ou anônimo e é pré-renderizada (site estático).
 export const prerender = true;
 
 import Base from '@/layouts/Base.astro';
 import { ownerData } from '@/data/owner_data';
 
 const base = import.meta.env.BASE_URL;
-const actionUrl = `${base}contato/sucesso/`;
+// Endereço de destino vem de owner_data (já é público no site). No primeiro envio, o FormSubmit manda um e-mail de ativação para ele.
+const actionUrl = `https://formsubmit.co/${ownerData.contact.email}`;
+const nextUrl = new URL(`${base}/contato/sucesso/`.replace(/\/+/g, '/'), Astro.site).toString();
 ---
 
 <Base
@@ -39,20 +41,13 @@ const actionUrl = `${base}contato/sucesso/`;
         name="contato"
         method="POST"
         action={actionUrl}
-        data-netlify="true"
-        data-netlify-honeypot="bot-field"
         class="flex flex-col gap-6"
       >
-        <!-- Campo oculto obrigatório para identificação do formulário no Netlify -->
-        <input type="hidden" name="form-name" value="contato" />
-
-        <!-- Campo honeypot anti-spam oculto para usuários reais -->
-        <p class="hidden">
-          <label>
-            Não preencha este campo se for humano:
-            <input name="bot-field" tabindex="-1" autocomplete="off" />
-          </label>
-        </p>
+        <!-- Configuração do FormSubmit: redirecionamento, assunto e honeypot anti-spam -->
+        <input type="hidden" name="_next" value={nextUrl} />
+        <input type="hidden" name="_subject" value={`Novo contato pelo site ${ownerData.siteName}`} />
+        <input type="hidden" name="_template" value="table" />
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none" />
 
         <!-- Campo Nome (opcional) -->
         <div>

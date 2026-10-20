@@ -27,6 +27,7 @@ const descricao = description ?? ownerData.tagline ?? ownerData.siteName;
 
 // Caminhos de ownerData começam com "/"; removemos a barra para prefixar com BASE_URL (R9)
 const faviconUrl = `${base}${ownerData.favicon.replace(/^\//, '')}`;
+const logoUrl = `${base}${ownerData.logo.replace(/^\//, '')}`;
 const faviconTipo = ownerData.favicon.endsWith('.svg') ? 'image/svg+xml' : undefined;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "http://localhost:4321");
@@ -68,14 +69,14 @@ const estiloTema = [
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={tituloCompleto} />
     <meta property="og:description" content={descricao} />
-    <meta property="og:image" content={image || ownerData.logo} />
+    <meta property="og:image" content={image || logoUrl} />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={tituloCompleto} />
     <meta property="twitter:description" content={descricao} />
-    <meta property="twitter:image" content={image || ownerData.logo} />
+    <meta property="twitter:image" content={image || logoUrl} />
 
 
 
