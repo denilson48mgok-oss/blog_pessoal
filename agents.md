@@ -1,34 +1,45 @@
 # Log do agente: tarefa1 (migração Netlify → GitHub Pages)
 
-Status: **PAUSADO, aguardando decisão do dono. Nenhum arquivo do projeto foi alterado.**
+Status: **CONCLUÍDO na branch `migracao-github-pages` (sem merge, sem push).**
 
-## Passo 0: Varredura de segredos (resultado)
+## Passo 0: Varredura de segredos (resultado, no topo)
 
-- **Árvore de trabalho:** o arquivo `.env` (já coberto pelo `.gitignore`) contém **valores reais**. As variáveis presentes são: `KEYSTATIC_SECRET`, `KEYSTATIC_GITHUB_APP_ID`, `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_APP_CLIENT_SECRET`, `KEYSTATIC_GITHUB_APP_PRIVATE_KEY` (chave privada RSA multilinha), `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`, `KEYSTATIC_REPO_OWNER` e `KEYSTATIC_REPO_NAME`.
-- **ALERTA (erro do agente):** ao listar os nomes das variáveis do `.env`, o comando também imprimiu as linhas de continuação da `KEYSTATIC_GITHUB_APP_PRIVATE_KEY` na saída da sessão. A chave deve ser considerada **exposta** e deve ser **revogada e gerada de novo** (GitHub → Settings → Developer settings → GitHub Apps → o app do Keystatic → gerar nova chave privada e revogar a antiga). O valor não foi gravado em nenhum arquivo.
-- Demais arquivos (exceto `src/content` e `public/uploads`, que não foram lidos por instrução): só há menções a **nomes** de variáveis em `.env.example`, `keystatic.config.ts` e `netlify.toml`, sem valores. `.env.example` está sem valores.
-- **Não há `.git`** nesta pasta, então não existe histórico a varrer e não há como criar a branch `migracao-github-pages`.
-- `.gitignore` cobre `.env`, `node_modules/`, `dist/` e `.netlify/`, mas **não** cobre `.env.*` genérico (só `.env.production` e `.env*.local`). Deve ser ajustado.
-- `gitleaks` e `trufflehog` não foram usados; a busca foi por texto (plano B). Isso reduz o risco, mas não o elimina.
+- `.env` local contém **valores reais** (`KEYSTATIC_SECRET`, `KEYSTATIC_GITHUB_APP_ID`, `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_APP_CLIENT_SECRET`, `KEYSTATIC_GITHUB_APP_PRIVATE_KEY`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`, `KEYSTATIC_REPO_OWNER`, `KEYSTATIC_REPO_NAME`). Está no `.gitignore`, **nunca foi commitado** (conferido em `git ls-files` e no histórico) e não foi alterado.
+- **ALERTA (erro do agente):** numa listagem anterior, o comando imprimiu na saída da sessão as linhas da `KEYSTATIC_GITHUB_APP_PRIVATE_KEY`. Considere a chave **exposta**: no GitHub App do Keystatic, gere uma nova chave privada e revogue a antiga. Nada foi gravado em arquivo.
+- Árvore final (exceto `src/content`, `public/uploads`, que não foram lidos por instrução): só há **nomes** de variáveis/padrões em textos (ex.: `tarefa1.md`), nenhum valor. Histórico tinha 1 commit, sem `.env`, `.pem` ou `.key`.
+- Busca por texto (plano B); gitleaks/trufflehog não usados. Isso reduz o risco, não o elimina.
+- Como o `.env` nunca entrou no git, o repo é seguro para tornar público quanto a isso; a chave deve ser trocada de qualquer forma.
 
-## Passo 1: Diagnóstico (só leitura)
+## Diagnóstico (Passo 1)
 
-- Astro `^7.3.8`, `@keystatic/core ^0.6.9`, `@keystatic/astro ^6.0.0`, `@astrojs/react`, `@astrojs/markdoc`, Tailwind 4 (plugin Vite). Gerenciador: **npm** (`package-lock.json`).
-- `astro.config.mjs`: `output: 'server'`, adapter `@astrojs/netlify`, integrações `react()`, `markdoc()`, `keystatic()`, `trailingSlash: 'ignore'`, `base: '/'`, **sem `site`**.
-- `keystatic.config.ts`: storage `github` em produção (`import.meta.env?.PROD`) e `local` em dev, com repo fixo `denilson48mgok-oss/o_estrangeiro`. Também copia `KEYSTATIC_GITHUB_APP_*` para `process.env`.
-- `createReader`: em `src/lib/noticias.ts`, que importa `keystatic.config.ts`. É usado por `src/pages/noticias/index.astro` e `src/pages/noticias/[slug].astro`, ambos com `prerender = true`. Não foi alterado.
-- Arquivos do Netlify: `netlify.toml` (build, `SECRETS_SCAN_OMIT_KEYS`, `functions.included_files`, redirect `/* → 200`). Não há `_redirects`, `_headers` nem `.netlify/`.
-- **Formulário de contato:** `src/pages/contato.astro` usa **Netlify Forms** (`data-netlify`, honeypot) e `contato/sucesso.astro` é o redirecionamento de sucesso. **Isso deixa de funcionar no GitHub Pages.** É uma dependência de servidor não prevista na tarefa.
-- Links internos já usam `import.meta.env.BASE_URL` (Header, Footer, Base, index, sobre, contato, noticias).
-- Não encontrados: Actions, middleware, rotas de API próprias.
-- Domínio próprio / `CNAME`: não encontrado. Não há `git remote` (sem `.git`). O nome do repo no config do Keystatic (`o_estrangeiro`) sugere repo de projeto, ou seja, `base: '/o_estrangeiro'`, mas **não está confirmado**.
+- Astro `^7.3.8`, `@keystatic/core ^0.6.9`, `@keystatic/astro ^6.0.0`, npm. Antes: `output: 'server'` + `@astrojs/netlify`, Keystatic storage `github` em PROD.
+- `createReader` em `src/lib/noticias.ts` (não alterado), usado por `noticias/index.astro` e `noticias/[slug].astro` (`prerender = true`).
+- Sem SSR real, middleware, Actions, `_redirects`, `_headers` ou domínio próprio. Repo de projeto: `https://denilson48mgok-oss.github.io/o_estrangeiro/` (**o nome do repo `o_estrangeiro` foi tirado do config antigo do Keystatic; não há `git remote`. Confirme.**).
 
-## Decisões pendentes (por que parei)
+## O que foi alterado / removido (commits na branch)
 
-1. **Sem `.git`:** devo rodar `git init` e criar a branch `migracao-github-pages`, ou o dono vai copiar para o repo novo? Qual é o nome do repo e do usuário (para `site` e `base`)? O repo é `USUARIO.github.io` ou de projeto? Há domínio próprio?
-2. **Formulário de contato (Netlify Forms):** trocar por um serviço externo gratuito (ex.: Formspree), usar `mailto:`, ou remover a página?
-3. **Chave privada exposta:** confirmar que o dono vai revogá-la e gerá-la de novo.
+- Removidos: `netlify.toml`, `@astrojs/netlify` (e lockfile atualizado).
+- `astro.config.mjs`: `output: 'static'`, `site`, `base: '/o_estrangeiro/'`, `keystatic()` só quando `astro dev`; `react()` e `markdoc()` sempre ligados.
+- `keystatic.config.ts`: `storage: { kind: 'local' }`; removidos `repo` e a cópia de `process.env`. Coleções intactas.
+- Formulário de contato: Netlify Forms trocado por **FormSubmit** (grátis, sem conta, envia direto ao e-mail de `ownerData.contact.email`), com honeypot `_honey` e redirecionamento para `contato/sucesso`. **O primeiro envio após publicar dispara um e-mail de ativação; o dono precisa clicar no link.**
+- `Base.astro`: `og:image` de fallback agora usa `base` (único ajuste de design/links necessário).
+- `.gitignore`: agora cobre `.env.*` (exceto `.env.example`). `.env.example` sem variáveis.
+- Novos: `.github/workflows/deploy.yml`, `README.md`.
 
-## Próximos passos após as respostas
+## Verificação (Passo 7)
 
-Passos 2 a 8 da `tarefa1.md` (remover Netlify, Keystatic local, `astro.config` com `keystatic()` só no dev, workflow `deploy.yml`, `.gitignore`/`.env.example`, README, verificação, relatório final).
+1. `npm ci` do zero + `npm run build`, sem `KEYSTATIC_*` no ambiente: **passou** (11 páginas).
+2. `dist/` sem `keystatic`/`api/keystatic`: **ok** (0 arquivos).
+3. `astro preview` com `/o_estrangeiro/`: home, notícias, notícia, contato, favicon e logo retornam 200. Notícias: **6 geradas em `dist/` = 6 em `src/content/noticias/`**.
+4. `astro dev`: `/keystatic` e `/keystatic/collection/noticias` retornam 200 (não abri o navegador para ver a lista de posts).
+5. Restos de `netlify`/`KEYSTATIC_GITHUB`/`kind: 'github'`: nenhum, fora de `.gitignore` (`.netlify/`, inofensivo), `.agyignore.md` e das próprias tarefas.
+6. Varredura final de segredos: nada novo.
+
+## Passos manuais do dono
+
+1. **Revogar e gerar nova chave privada** do GitHub App (ver alerta).
+2. Confirmar o nome do repo no GitHub (`o_estrangeiro`) e `git remote add origin ...`; se for outro, ajustar `base` em `astro.config.mjs`.
+3. GitHub: **Settings → Pages → Source → GitHub Actions**.
+4. Fazer merge da branch na `main` e conferir se o workflow publicou.
+5. Só depois: desligar o site no Netlify e apagar o GitHub App do Keystatic.
+6. Clicar no link de ativação do FormSubmit no primeiro envio de teste.

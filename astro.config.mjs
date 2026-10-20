@@ -11,8 +11,8 @@ const isDev = process.argv.includes('dev');
 // https://astro.build/config
 export default defineConfig({
   site: 'https://denilson48mgok-oss.github.io',
-  base: '/o_estrangeiro/',
-  output: 'static',
+  base: '/', // O keystatic precisa de uma '/'. É uma issue #1170 no github "Keystatic's admin cant run under a base path yet"
+  output: 'server',
   integrations: [
     react(),
     markdoc(),

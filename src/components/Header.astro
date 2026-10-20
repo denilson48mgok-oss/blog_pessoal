@@ -18,6 +18,8 @@ const normalizarCaminho = (caminho: string): string =>
   caminho.replace(/\/+$/, '') || '/';
 
 // Início só corresponde à raiz; as demais seções também abrangem suas subpáginas.
+//TODO: tem que alterar aqui, pois se "base" em astro.config.mjs for diferente de "/", a comparação não vai funcionar. Implementar de forma dinâmica, usando a variável "base" para normalizar o caminho atual e o destino. Por exemplo, se base = "/o_estrangeiro/", então a página "/o_estrangeiro/sobre/" deve ser considerada parte da seção "Sobre".
+// e dessa forma o estilo do menu "Inicio" não vai ficar ativo quando o usuário estiver em uma subpágina, como "/o_estrangeiro/sobre/". A função "estaAtivo" precisa ser ajustada para levar em conta a base do site.
 const estaAtivo = (href: string): boolean => {
   const atual = normalizarCaminho(caminhoAtual);
   const destino = normalizarCaminho(href);
