@@ -1,4 +1,4 @@
-# Arquivos e diretórios ignorados pelo Git no projeto Astro e Netlify.
+# Arquivos e diretórios ignorados pelo Git no projeto Astro (GitHub Pages).
 node_modules/
 dist/
 .astro/
@@ -6,8 +6,8 @@ dist/
 
 # Variáveis de ambiente
 .env
-.env.production
-.env*.local
+.env.*
+!.env.example
 
 # Logs
 npm-debug.log*
