@@ -26,4 +26,4 @@ O painel do Keystatic **não existe em produção**: ele só funciona localmente
 
 ## Formulário de contato
 
-Usa o [FormSubmit](https://formsubmit.co) (gratuito, sem conta). No primeiro envio depois de publicar, o FormSubmit manda um e-mail de ativação para o endereço configurado em `src/data/owner_data.ts`; é preciso clicar no link desse e-mail para que as mensagens passem a chegar.
+Usa o Web3Forms(app.web3forms.com) (gratuito, sem conta). No primeiro envio depois de publicar, o FormSubmit manda um e-mail de ativação para o endereço configurado em `src/data/owner_data.ts`; é preciso clicar no link desse e-mail para que as mensagens passem a chegar.
