@@ -2,24 +2,9 @@
 // Define o modo de armazenamento e o schema da coleção de notícias.
 import { config, collection, fields } from '@keystatic/core';
 
-// O Keystatic só lê KEYSTATIC_GITHUB_CLIENT_ID e KEYSTATIC_GITHUB_CLIENT_SECRET.
-// Aceitamos também os nomes com "_APP_" (usados no Netlify) para evitar erro 500 na API.
-if (typeof process !== 'undefined' && process.env) {
-  process.env.KEYSTATIC_GITHUB_CLIENT_ID ||= process.env.KEYSTATIC_GITHUB_APP_CLIENT_ID;
-  process.env.KEYSTATIC_GITHUB_CLIENT_SECRET ||= process.env.KEYSTATIC_GITHUB_APP_CLIENT_SECRET;
-}
-
+// Modo local: o painel só existe no `astro dev`; em produção o site é estático.
 export default config({
-  storage: import.meta.env?.PROD
-    ? {
-        kind: 'github',
-        // Valores fixos: este arquivo também roda no navegador, onde process.env não existe.
-        repo: {
-          owner: 'denilson48mgok-oss',
-          name: 'o_estrangeiro',
-        },
-      }
-    : { kind: 'local' },
+  storage: { kind: 'local' },
   collections: {
     noticias: collection({
       label: 'Notícias',
