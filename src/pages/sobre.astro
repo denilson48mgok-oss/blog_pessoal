@@ -1,0 +1,27 @@
+---
+import Base from "@/layouts/Base.astro";
+import { ownerData } from "@/data/owner_data";
+
+const base = import.meta.env.BASE_URL;
+---
+<!-- Aqui vai ser implementado a página "sobre do site" -->
+
+<Base title="Sobre" description={ownerData.tagline} >
+  <section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-6xl">
+      <h1 class="font-heading text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-left text-heading mb-8">
+        Sobre <span class="text-primary">{ownerData.siteName}</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-text mb-4">
+        {ownerData.sobre? ownerData.sobre : "A Revista Codorninha é uma publicação digital dedicada a fornecer informações, análises e insights sobre uma variedade de tópicos relevantes para nossos leitores."}
+      </p>
+      <p class="text-lg sm:text-xl text-text mb-4">
+        Fundada por entusiastas da comunicação e da informação, a revista busca promover o conhecimento e a cultura, abordando assuntos que vão desde ciência e tecnologia até arte e entretenimento.
+      </p>
+      <p class="text-lg sm:text-xl text-text mb-4">
+        Agradecemos a todos os nossos leitores pelo apoio contínuo e esperamos continuar trazendo conteúdo valioso para vocês.
+      </p>
+    </div>
+  </section>
+</Base>
+

@@ -1,0 +1,52 @@
+---
+// Rodapé padrão de portal de notícias: nome da revista, links principais,
+// contatos (se definidos em ownerData), ano atual e direitos reservados.
+import { ownerData } from '@/data/owner_data';
+
+const base = import.meta.env.BASE_URL;
+const { phone, email } = ownerData.contact;
+const anoAtual = new Date().getFullYear();
+// Remove tudo que não é dígito ou "+" para montar um link tel: válido
+const telefoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : undefined;
+---
+
+<footer class="mt-12 border-t border-border bg-surface text-sm">
+  <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 md:grid-cols-3">
+    <div>
+      <p class="font-heading text-lg font-bold text-heading">{ownerData.siteName}</p>
+      {ownerData.tagline && <p class="mt-1 text-textMuted">{ownerData.tagline}</p>}
+    </div>
+
+    <nav aria-label="Links do rodapé">
+      <ul class="flex flex-col gap-2">
+        <li><a href={`${base}`} class="hover:underline hover:text-primary">Início</a></li>
+        <li><a href={`${base}noticias/`} class="hover:underline hover:text-primary">Notícias</a></li>
+        <li><a href={`${base}sobre/`} class="hover:underline hover:text-primary">Sobre</a></li>
+        <li><a href={`${base}contato/`} class="hover:underline hover:text-primary">Contato</a></li>
+      </ul>
+    </nav>
+
+    {
+      (phone || email) && (
+        <address class="flex flex-col gap-2 not-italic">
+          {phone && (
+            <a href={telefoneHref} class="hover:underline">
+              {phone}
+            </a>
+          )}
+          {email && (
+            <a href={`mailto:${email}`} class="break-all hover:underline">
+              {email}
+            </a>
+          )}
+        </address>
+      )
+    }
+  </div>
+
+  <div class="border-t border-border">
+    <p class="mx-auto max-w-6xl px-4 py-4 text-textMuted sm:px-6">
+      © {anoAtual} {ownerData.siteName}. Todos os direitos reservados.
+    </p>
+  </div>
+</footer>

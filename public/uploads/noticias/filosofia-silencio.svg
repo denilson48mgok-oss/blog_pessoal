@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#14110f"/>
+  <rect x="40" y="40" width="720" height="370" rx="8" fill="#1f1b18" stroke="#3a342e" stroke-width="2"/>
+  <circle cx="400" cy="180" r="50" fill="none" stroke="#c9a24a" stroke-width="4"/>
+  <path d="M370 180 Q400 130 430 180 T400 230" fill="none" stroke="#e8e2d6" stroke-width="3"/>
+  <text x="400" y="370" fill="#f7f4ee" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">Ensaio Filosófico — O Silêncio</text>
+</svg>

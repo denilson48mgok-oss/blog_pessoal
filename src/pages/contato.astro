@@ -1,0 +1,131 @@
+---
+// Página de contato da Revista Codorninha com integração ao Netlify Forms.
+// Suporta envio identificado ou anônimo e é pré-renderizada para detecção estática do Netlify.
+export const prerender = true;
+
+import Base from '@/layouts/Base.astro';
+import { ownerData } from '@/data/owner_data';
+
+const base = import.meta.env.BASE_URL;
+const actionUrl = `${base}contato/sucesso/`;
+---
+
+<Base
+  title="Entre em contato"
+  description={`Envie mensagens, sugestões de pauta ou críticas para a redação da ${ownerData.siteName}.`}
+>
+  <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+    <header class="mb-8">
+      <h1 class="font-heading text-3xl font-bold tracking-tight text-heading sm:text-4xl">
+        Entre em contato
+      </h1>
+      <p class="mt-2 text-base text-textMuted sm:text-lg">
+        Envie sua sugestão, crítica ou manifestação para a nossa equipe editorial.
+      </p>
+    </header>
+
+    <div class="rounded-xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+      <!-- Aviso de envio anônimo -->
+      <div class="mb-6 rounded-lg border border-border bg-background p-4 text-sm text-text">
+        <p class="font-semibold text-heading">
+          Você pode enviar sua mensagem de forma anônima.
+        </p>
+        <p class="mt-1 text-textMuted">
+          Os campos de nome e contato para resposta são opcionais. Caso deseje um retorno da redação, informe seu e-mail ou telefone.
+        </p>
+      </div>
+
+      <form
+        name="contato"
+        method="POST"
+        action={actionUrl}
+        data-netlify="true"
+        data-netlify-honeypot="bot-field"
+        class="flex flex-col gap-6"
+      >
+        <!-- Campo oculto obrigatório para identificação do formulário no Netlify -->
+        <input type="hidden" name="form-name" value="contato" />
+
+        <!-- Campo honeypot anti-spam oculto para usuários reais -->
+        <p class="hidden">
+          <label>
+            Não preencha este campo se for humano:
+            <input name="bot-field" tabindex="-1" autocomplete="off" />
+          </label>
+        </p>
+
+        <!-- Campo Nome (opcional) -->
+        <div>
+          <label for="campo-nome" class="block text-sm font-medium text-heading">
+            Nome <span class="text-xs font-normal text-textMuted">(opcional)</span>
+          </label>
+          <input
+            type="text"
+            id="campo-nome"
+            name="nome"
+            autocomplete="name"
+            placeholder="Deixe em branco para envio anônimo"
+            class="mt-1.5 block w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-text placeholder:text-textMuted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-base"
+          />
+        </div>
+
+        <!-- Campo Contato para resposta (opcional) -->
+        <div>
+          <label for="campo-contato" class="block text-sm font-medium text-heading">
+            Contato para resposta <span class="text-xs font-normal text-textMuted">(opcional: email ou telefone)</span>
+          </label>
+          <input
+            type="text"
+            id="campo-contato"
+            name="contato_resposta"
+            autocomplete="email"
+            placeholder="Seu e-mail ou telefone para receber retorno"
+            class="mt-1.5 block w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-text placeholder:text-textMuted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-base"
+          />
+        </div>
+
+        <!-- Campo Assunto (obrigatório) -->
+        <div>
+          <label for="campo-assunto" class="block text-sm font-medium text-heading">
+            Assunto <span class="text-primary" aria-hidden="true">*</span>
+          </label>
+          <input
+            type="text"
+            id="campo-assunto"
+            name="assunto"
+            required
+            aria-required="true"
+            placeholder="Qual o assunto da mensagem?"
+            class="mt-1.5 block w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-text placeholder:text-textMuted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-base"
+          />
+        </div>
+
+        <!-- Campo Mensagem (obrigatório) -->
+        <div>
+          <label for="campo-mensagem" class="block text-sm font-medium text-heading">
+            Mensagem <span class="text-primary" aria-hidden="true">*</span>
+          </label>
+          <textarea
+            id="campo-mensagem"
+            name="mensagem"
+            rows="6"
+            required
+            aria-required="true"
+            placeholder="Escreva detalhadamente sua mensagem, denúncia ou sugestão..."
+            class="mt-1.5 block w-full resize-y rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-text placeholder:text-textMuted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-base"
+          ></textarea>
+        </div>
+
+        <!-- Botão de envio -->
+        <div class="pt-2">
+          <button
+            type="submit"
+            class="inline-flex w-full items-center justify-center rounded-md bg-primary px-6 py-3 text-base font-medium text-white shadow-sm transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-auto"
+          >
+            Enviar mensagem
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>

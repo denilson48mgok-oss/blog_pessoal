@@ -1,0 +1,115 @@
+---
+// Cabeçalho do site: logo + nome da revista à esquerda e navegação principal.
+// Em telas pequenas, a navegação vira um menu hambúrguer acessível por teclado.
+import { ownerData } from '@/data/owner_data';
+
+const base = import.meta.env.BASE_URL;
+const logoUrl = `${base}${ownerData.logo.replace(/^\//, '')}`;
+const caminhoAtual = Astro.url.pathname;
+
+const itens = [
+  { rotulo: 'Início', href: `${base}` },
+  { rotulo: 'Notícias', href: `${base}noticias/` },
+  { rotulo: 'Sobre', href: `${base}sobre/` },
+  { rotulo: 'Entre em contato', href: `${base}contato/` }
+];
+
+const normalizarCaminho = (caminho: string): string =>
+  caminho.replace(/\/+$/, '') || '/';
+
+// Início só corresponde à raiz; as demais seções também abrangem suas subpáginas.
+const estaAtivo = (href: string): boolean => {
+  const atual = normalizarCaminho(caminhoAtual);
+  const destino = normalizarCaminho(href);
+
+  return destino === '/'
+    ? atual === destino
+    : atual === destino || atual.startsWith(`${destino}/`);
+};
+---
+
+<header class="border-b border-border bg-surface sticky top-0 z-10">
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 px-4 py-3 sm:px-6">
+    <a
+      href={base}
+      class="flex min-w-0 items-center gap-3 rounded no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+    >
+      <img src={logoUrl} alt="" class="h-9 w-auto shrink-0 sm:h-10" />
+      <span class="truncate font-heading text-xl font-bold tracking-tight text-heading sm:text-2xl">
+        {ownerData.siteName}
+      </span>
+    </a>
+
+    <button
+      type="button"
+      id="botao-menu"
+      class="inline-flex items-center justify-center rounded p-2 text-heading hover:bg-background focus-visible:outline-2 focus-visible:outline-primary md:hidden"
+      aria-controls="menu-principal"
+      aria-expanded="false"
+      aria-label="Abrir menu"
+    >
+      <!-- Ícone hambúrguer; troca para "X" via CSS quando o menu está aberto -->
+      <svg class="icone-abrir h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <svg class="icone-fechar hidden h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+
+    <nav id="menu-principal" aria-label="Navegação principal" class="hidden w-full md:block md:w-auto">
+      <ul class="flex flex-col gap-1 border-t border-border py-2 md:flex-row md:gap-6 md:border-0 md:py-0">
+        {
+          itens.map(({ rotulo, href }) => {
+            const ativo = estaAtivo(href);
+            return (
+              <li>
+                <a
+                  href={href}
+                  aria-current={ativo ? 'page' : undefined}
+                  class:list={[
+                    'block rounded px-2 py-2 font-medium no-underline transition-colors md:px-0 md:py-1',
+                    'border-l-4 md:border-l-0 md:border-b-2',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                    ativo
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-text hover:text-primary',
+                  ]}
+                >
+                  {rotulo}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Abre/fecha o menu mobile, atualizando aria-expanded; Esc fecha e devolve o foco ao botão.
+  const botao = document.getElementById('botao-menu');
+  const menu = document.getElementById('menu-principal');
+
+  if (botao && menu) {
+    const definirAberto = (aberto: boolean): void => {
+      botao.setAttribute('aria-expanded', String(aberto));
+      botao.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+      menu.classList.toggle('hidden', !aberto);
+      botao.querySelector('.icone-abrir')?.classList.toggle('hidden', aberto);
+      botao.querySelector('.icone-fechar')?.classList.toggle('hidden', !aberto);
+    };
+
+    botao.addEventListener('click', () => {
+      definirAberto(botao.getAttribute('aria-expanded') !== 'true');
+    });
+
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Escape' && botao.getAttribute('aria-expanded') === 'true') {
+        definirAberto(false);
+        botao.focus();
+      }
+    });
+  }
+</script>

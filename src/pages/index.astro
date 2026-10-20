@@ -1,0 +1,176 @@
+---
+// Página inicial da Revista Codorninha.
+// Apresenta o Hero com a identidade visual e o grid com as 4 últimas notícias cadastradas.
+// TODO: refatorar para separar o Hero e o grid de notícias em componentes distintos.
+// TODO: refatorar, criando o componente CardNoticia para evitar duplicação de código com a página de listagem de notícias.
+import Base from '@/layouts/Base.astro';
+import { ownerData } from '@/data/owner_data';
+import { listarNoticias, gerarResumo } from '@/lib/noticias';
+
+const base = import.meta.env.BASE_URL;
+
+// Obtém as notícias ordenadas e seleciona as 4 mais recentes
+const todasNoticias = await listarNoticias();
+const ultimasNoticias = todasNoticias.slice(0, 4);
+
+// Pré-computa o resumo de cada notícia para renderização no card
+const noticiasCards = await Promise.all(
+  ultimasNoticias.map(async (noticia) => ({
+    ...noticia,
+    resumo: await gerarResumo(noticia),
+  }))
+);
+
+// Formata a data ISO (YYYY-MM-DD) para exibição legível em português
+const formatarData = (dataIso: string): string => {
+  const [ano, mes, dia] = dataIso.split('-').map(Number);
+  if (!ano || !mes || !dia) return dataIso;
+  const dataObj = new Date(Date.UTC(ano, mes - 1, dia));
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(dataObj);
+};
+
+// Verifica se há imagem de fundo personalizada configurada no dono
+const temImagemFundo = Boolean(ownerData.heroBackgroundImage && ownerData.heroBackgroundImage.trim() !== '');
+const heroImagemUrl = temImagemFundo
+  ? `${base}${ownerData.heroBackgroundImage!.replace(/^\//, '')}`
+  : undefined;
+---
+
+<Base>
+  {/* Seção Hero: alinhada à esquerda com suporte a imagem de fundo ou cor primária */}
+  <section
+    class:list={[
+      'relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8',
+      temImagemFundo ? 'bg-cover bg-center' : 'bg-primary text-white',
+    ]}
+    style={temImagemFundo ? `background-image: url('${heroImagemUrl}')` : undefined}
+  >
+    {
+      temImagemFundo && (
+        <div class="absolute inset-0 bg-background/80 backdrop-blur-xs" aria-hidden="true" />
+      )
+    }
+    <div class="relative mx-auto max-w-6xl">
+      <h1
+        class:list={[
+          'font-heading text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-left',
+          temImagemFundo ? 'text-heading' : 'text-white',
+        ]}
+      >
+        {ownerData.siteName}
+      </h1>
+      {
+        ownerData.tagline && (
+          <p
+            class:list={[
+              'mt-4 max-w-2xl text-lg sm:text-xl text-left',
+              temImagemFundo ? 'text-textMuted' : 'text-white/90',
+            ]}
+          >
+            {ownerData.tagline}
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  {/* Seção de Últimas Notícias */}
+  <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="mb-8 flex items-end justify-between border-b border-border pb-4">
+      <div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-heading">
+          Últimas notícias
+        </h2>
+        <p class="mt-1 text-sm text-textMuted">
+          Acompanhe os acontecimentos mais recentes, análises e eventos locais.
+        </p>
+      </div>
+      <a
+        href={`${base}noticias/`}
+        class="hidden sm:inline-flex items-center text-sm font-semibold text-primary hover:underline"
+      >
+        Ver todas as notícias &rarr;
+      </a>
+    </div>
+    <!-- {`Seção de cards de notícias: exibe um card para cada notícia recente ou uma mensagem caso não haja notícias`} -->
+    {
+      noticiasCards.length === 0 ? (
+        <div class="rounded-lg border border-dashed border-border p-12 text-center">
+          <p class="text-base text-textMuted">Nenhuma notícia publicada ainda</p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {
+            noticiasCards.map((noticia) => {
+              const urlNoticia = `${base}noticias/${noticia.slug}/`;
+              const imagemUrl = noticia.imagem
+                ? `${base}${noticia.imagem.replace(/^\//, '')}`
+                : null;
+
+              return (
+                <a
+                  href={urlNoticia}
+                  class="group flex flex-col overflow-hidden rounded-lg border border-border bg-surface no-underline transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  {/* Bloco de imagem ou bloco com cor como fallback */}
+                  <div class="relative aspect-video w-full overflow-hidden bg-surface border-b border-border">
+                    {imagemUrl ? (
+                      <img
+                        src={imagemUrl}
+                        alt=""
+                        loading="lazy"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div class="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
+                        <span class="font-heading text-xs font-semibold uppercase tracking-wider">
+                          {ownerData.siteName}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Conteúdo textual do card */}
+                  <div class="flex flex-1 flex-col p-5">
+                    <time
+                      datetime={noticia.data}
+                      class="text-xs font-medium text-textMuted"
+                    >
+                      {formatarData(noticia.data)}
+                    </time>
+                    <h3 class="mt-2 font-heading text-lg font-bold leading-snug text-heading transition-colors group-hover:text-primary">
+                      {noticia.titulo}
+                    </h3>
+                    {noticia.resumo && (
+                      <p class="mt-2 line-clamp-3 text-sm text-textMuted leading-relaxed">
+                        {noticia.resumo}
+                      </p>
+                    )}
+                    <div class="mt-auto pt-4 flex items-center text-xs font-semibold text-primary">
+                      <span>Ler matéria completa</span>
+                      <span class="ml-1 transition-transform group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
+                    </div>
+                  </div>
+                </a>
+              );
+            })
+          }
+        </div>
+      )
+    }
+
+    <div class="mt-8 text-center sm:hidden">
+      <a
+        href={`${base}noticias/`}
+        class="inline-block text-sm font-semibold text-primary hover:underline"
+      >
+        Ver todas as notícias &rarr;
+      </a>
+    </div>
+  </section>
+</Base>

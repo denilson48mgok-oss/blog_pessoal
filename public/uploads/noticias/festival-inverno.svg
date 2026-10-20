@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#1f1b18"/>
+  <rect x="40" y="40" width="720" height="370" rx="8" fill="#14110f" stroke="#3a342e" stroke-width="2"/>
+  <polygon points="400,120 460,240 340,240" fill="#c0392b" opacity="0.85"/>
+  <circle cx="400" cy="210" r="25" fill="#c9a24a"/>
+  <text x="400" y="370" fill="#f7f4ee" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">Festival de Inverno — Cultura e Arte</text>
+</svg>

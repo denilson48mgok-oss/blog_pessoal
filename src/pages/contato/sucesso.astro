@@ -1,0 +1,49 @@
+---
+// Página de confirmação de envio do formulário de contato.
+// Exibida após o redirecionamento de sucesso do Netlify Forms.
+export const prerender = true;
+
+import Base from '@/layouts/Base.astro';
+import { ownerData } from '@/data/owner_data';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Base
+  title="Mensagem enviada"
+  description={`Confirmação de envio de contato para a redação da ${ownerData.siteName}.`}
+>
+  <section class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 text-center">
+    <div class="rounded-xl border border-border bg-surface p-8 shadow-sm sm:p-12">
+      <!-- Ícone de confirmação -->
+      <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+
+      <h1 class="font-heading text-2xl font-bold tracking-tight text-heading sm:text-3xl">
+        Mensagem enviada com sucesso!
+      </h1>
+
+      <p class="mt-4 text-base text-textMuted sm:text-lg">
+        Agradecemos pelo seu contato. Sua mensagem foi recebida pela equipe da <strong class="text-heading">{ownerData.siteName}</strong> e será analisada com atenção.
+      </p>
+
+      <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <a
+          href={base}
+          class="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          Voltar para a página inicial
+        </a>
+        <a
+          href={`${base}contato/`}
+          class="inline-flex items-center justify-center rounded-md border border-border bg-background px-5 py-2.5 text-sm font-medium text-heading transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          Enviar outra mensagem
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

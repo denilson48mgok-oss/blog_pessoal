@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#14110f"/>
+  <rect x="40" y="40" width="720" height="370" rx="8" fill="#1f1b18" stroke="#3a342e" stroke-width="2"/>
+  <rect x="320" y="240" width="40" height="80" fill="#c0392b"/>
+  <rect x="380" y="190" width="40" height="130" fill="#c9a24a"/>
+  <rect x="440" y="140" width="40" height="180" fill="#e8e2d6"/>
+  <text x="400" y="370" fill="#f7f4ee" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">Orçamento Participativo — Comunidade e Gestão</text>
+</svg>

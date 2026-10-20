@@ -1,0 +1,80 @@
+---
+// Página de listagem completa de notícias da Revista Codorninha (Central de Notícias).
+// Apresenta cabeçalho editorial com identificação do autor e integra a ilha React NoticiasExplorer para busca e filtros em tempo real.
+import Base from '@/layouts/Base.astro';
+import { ownerData } from '@/data/owner_data';
+import { listarNoticias, gerarResumo } from '@/lib/noticias';
+import NoticiasExplorer, { type NoticiaItemProp } from '@/components/NoticiasExplorer';
+
+// Pré-renderizado no build: em produção, a função serverless não encontra src/content no disco.
+export const prerender = true;
+
+const base = import.meta.env.BASE_URL;
+
+// Carrega todas as notícias cadastradas
+const todasNoticias = await listarNoticias();
+
+// Serializa apenas os campos necessários para as props da ilha React, evitando inflar o HTML
+const noticiasProps: NoticiaItemProp[] = await Promise.all(
+  todasNoticias.map(async (noticia) => ({
+    slug: noticia.slug,
+    titulo: noticia.titulo,
+    data: noticia.data,
+    resumo: await gerarResumo(noticia),
+    imagem: noticia.imagem ?? null,
+  }))
+);
+
+// Resolve o caminho da foto de perfil do autor com BASE_URL
+const autorFotoUrl = ownerData.author.profilePhoto
+  ? `${base}${ownerData.author.profilePhoto.replace(/^\//, '')}`
+  : null;
+---
+
+<Base
+  title="Central de Notícias"
+  description="Informações transparentes e atualizadas. Consulte matérias jornalísticas e avisos de utilidade pública."
+>
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+    {/* Cabeçalho da página */}
+    <header class="mb-10 border-b border-border pb-8">
+      <h1 class="font-heading text-3xl font-bold tracking-tight text-heading sm:text-4xl lg:text-5xl">
+        Central de Notícias
+      </h1>
+
+      {/* Autor com nome e foto redonda pequena */}
+      <div class="mt-4 flex items-center gap-3">
+        {
+          autorFotoUrl ? (
+            <img
+              src={autorFotoUrl}
+              alt=""
+              class="h-9 w-9 rounded-full border border-border object-cover"
+              loading="eager"
+            />
+          ) : (
+            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              {ownerData.author.name.charAt(0)}
+            </div>
+          )
+        }
+        <span class="text-sm font-semibold text-heading">
+          {ownerData.author.name}
+        </span>
+      </div>
+
+      {/* Subtítulo institucional */}
+      <p class="mt-3 max-w-2xl text-base text-textMuted sm:text-lg">
+        Informações transparentes e atualizadas. Consulte matérias jornalísticas e avisos de utilidade pública.
+      </p>
+    </header>
+
+    {/* Ilha interativa React com carregamento imediato (client:load) */}
+    <NoticiasExplorer
+      client:load
+      noticias={noticiasProps}
+      baseUrl={base}
+      siteName={ownerData.siteName}
+    />
+  </div>
+</Base>
