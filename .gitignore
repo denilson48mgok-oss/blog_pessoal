@@ -5,6 +5,7 @@ dist/
 .netlify/
 tasks/
 agents.md
+logs.md
 
 # Variáveis de ambiente
 .env
