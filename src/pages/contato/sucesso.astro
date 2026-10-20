@@ -1,49 +1,64 @@
 ---
-// Página de confirmação de envio do formulário de contato.
-// Exibida após o redirecionamento de sucesso do FormSubmit.
 export const prerender = true;
 
 import Base from '@/layouts/Base.astro';
 import { ownerData } from '@/data/owner_data';
 
 const base = import.meta.env.BASE_URL;
+const homeUrl = `${base}/`.replace(/\/+/g, '/');
+const contatoUrl = `${base}/contato/`.replace(/\/+/g, '/');
 ---
 
-<Base
-  title="Mensagem enviada"
-  description={`Confirmação de envio de contato para a redação da ${ownerData.siteName}.`}
+<Base 
+  title="Mensagem Enviada" 
+  description={`Agradecemos o contato enviado à redação da ${ownerData.siteName}.`}
 >
-  <section class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 text-center">
-    <div class="rounded-xl border border-border bg-surface p-8 shadow-sm sm:p-12">
-      <!-- Ícone de confirmação -->
-      <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="20 6 9 17 4 12" />
+  <section class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24">
+    <div class="flex flex-col items-center rounded-xl border border-border bg-surface p-6 text-center shadow-sm sm:p-10">
+      
+      <!-- Ícone decorativo de sucesso -->
+      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <svg
+          class="h-8 w-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       </div>
 
-      <h1 class="font-heading text-2xl font-bold tracking-tight text-heading sm:text-3xl">
+      <h1 class="mt-6 font-heading text-2xl font-bold tracking-tight text-heading sm:text-3xl">
         Mensagem enviada com sucesso!
       </h1>
 
-      <p class="mt-4 text-base text-textMuted sm:text-lg">
-        Agradecemos pelo seu contato. Sua mensagem foi recebida pela equipe da <strong class="text-heading">{ownerData.siteName}</strong> e será analisada com atenção.
+      <p class="mt-3 text-base text-textMuted sm:text-lg">
+        Agradecemos pela sua contribuição. Sua manifestação foi encaminhada para a redação 
+        <strong class="font-semibold text-text"> {ownerData.siteName}</strong>.
       </p>
 
-      <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+      <p class="mt-1 text-sm text-textMuted">
+        Se você incluiu um e-mail ou telefone para resposta, retornaremos assim que possível.
+      </p>
+
+      <!-- Ações de Retorno -->
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
         <a
-          href={base}
-          class="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          href={homeUrl}
+          class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           Voltar para a página inicial
         </a>
         <a
-          href={`${base}contato/`}
-          class="inline-flex items-center justify-center rounded-md border border-border bg-background px-5 py-2.5 text-sm font-medium text-heading transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          href={contatoUrl}
+          class="inline-flex items-center justify-center rounded-md border border-border bg-background px-6 py-2.5 text-sm font-medium text-text transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           Enviar outra mensagem
         </a>
       </div>
+
     </div>
   </section>
 </Base>

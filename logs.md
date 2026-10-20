@@ -75,3 +75,37 @@ Resumo do que foi realizado:
 
 Verificação:
 - Executado `npm run build` com sucesso (código 0, 11 páginas estáticas geradas com sucesso).
+
+
+# Log do agente: task 6 (implementação da página de sucesso de contato)
+
+Data: 2026-10-20
+
+Resumo do que foi realizado:
+1. `src/pages/contato/sucesso.astro`:
+   - Implementada a página de confirmação de envio do formulário de contato com `export const prerender = true;`.
+   - Utilizado o layout `Base` (`@/layouts/Base.astro`) e metadados institucionais via `@/data/owner_data`.
+   - Estruturado o card de confirmação com classes utilitárias Tailwind (`rounded-xl border border-border bg-surface text-center shadow-sm`).
+   - Adicionado ícone decorativo de sucesso com `bg-primary/10 text-primary`.
+   - Criados botões de navegação e retorno ("Voltar para a página inicial" e "Enviar outra mensagem") com sanitização de rota base via `import.meta.env.BASE_URL`.
+
+Verificação:
+- Executado `npm run build` com sucesso (código 0, 11 páginas geradas, incluindo `/contato/sucesso/index.html`).
+
+
+
+# Log do agente: task 7 (migração do formulário de contato para Web3Forms)
+
+Data: 2026-10-20
+
+Resumo do que foi realizado:
+1. `src/pages/contato.astro`:
+   - `action` do formulário alterada de `https://formsubmit.co/...` para `https://api.web3forms.com/submit`; removida a constante `actionUrl` e o comentário sobre ativação do FormSubmit.
+   - Removidos os campos ocultos do FormSubmit (`_next`, `_captcha`, `_subject`, `_template`); mantido o honeypot `_honey`.
+   - Adicionados os campos do Web3Forms: `access_key` (chave pública), `subject` (assunto dinâmico com `ownerData.siteName`), `redirect` (`nextUrl`) e o checkbox oculto `botcheck`.
+   - Adicionado `<script>` client-side que intercepta o submit, desabilita o botão com o texto "Enviando...", envia via `fetch` aguardando a resposta JSON real da API e, se `data.success`, redireciona para a URL do input `redirect`. Em erro, exibe alerta e restaura o botão. Não há uso de `keepalive`.
+   - Inicialização em `DOMContentLoaded` e `astro:page-load`, com marca `data-bound` no formulário para evitar listeners duplicados (envio em dobro).
+   - Campos visíveis, estrutura e classes de estilo mantidos inalterados.
+
+Verificação:
+- Executado `npm run build` com sucesso (código 0, 11 páginas estáticas geradas, incluindo `/contato/index.html`).
