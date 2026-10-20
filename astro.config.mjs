@@ -1,27 +1,25 @@
-// Configuração principal do Astro com suporte a Netlify, Keystatic, React e Tailwind CSS.
+// Configuração principal do Astro: site estático para GitHub Pages, com Keystatic (painel admin) apenas no dev local, React, Markdoc e Tailwind CSS.
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import markdoc from '@astrojs/markdoc';
 import keystatic from '@keystatic/astro';
-import netlify from '@astrojs/netlify';
 import tailwindcss from '@tailwindcss/vite';
+
+// O painel do Keystatic precisa de servidor, então só entra no `astro dev`.
+const isDev = process.argv.includes('dev');
 
 // https://astro.build/config
 export default defineConfig({
-  output:'server',
-  adapter: netlify({
-    devFeatures: {
-      edgeFunctions: false,
-    },
-  }),
+  site: 'https://denilson48mgok-oss.github.io',
+  base: '/o_estrangeiro/',
+  output: 'static',
   integrations: [
     react(),
     markdoc(),
-    keystatic(),
+    ...(isDev ? [keystatic()] : []),
   ],
   vite: {
     plugins: [tailwindcss()],
   },
-  trailingSlash: 'ignore',// Configuração para ignorar a barra final nas URLs. Essencial para funcionar corretamente com o keystatic e o Netlify, evitando problemas de roteamento e garantindo que as URLs sejam consistentes.
-  base: '/',
+  trailingSlash: 'ignore',
 });
