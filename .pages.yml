@@ -1,0 +1,39 @@
+media:
+  input: public/uploads/noticias
+  output: /uploads/noticias
+  rename: safe
+
+content:
+  - name: noticias
+    label: Notícias
+    type: collection
+    path: src/content/noticias
+    format: yaml-frontmatter
+    filename: "{primary}.mdoc"
+    view:
+      primary: titulo
+      sort: data
+      order: desc
+    fields:
+      - name: titulo
+        label: Título
+        type: string
+        required: true
+      - name: data
+        label: Data
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: resumo
+        label: Resumo
+        type: text
+        description: Texto curto de introdução (opcional). Se omitido, o resumo é extraído do conteúdo.
+      - name: imagem
+        label: Imagem de capa
+        type: image
+      - name: body
+        label: Conteúdo
+        type: rich-text
+        options:
+          format: markdown
