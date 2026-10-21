@@ -41,7 +41,8 @@ const formatarDataCompleta = (dataIso: string): string => {
 
 const { Content } = noticia ? await render(noticia.entry) : { Content: null };
 const metaDescricao = noticia ? noticia.resumo || (await gerarResumo(noticia)) : '';
-
+const testeResumo = await gerarResumo(noticia); // para testar, já qeue o resumo nao esta aparecendo sem isso
+// TODO: ajustar a logica, já que usando noticia.resumo || (await gerarResumo(noticia)) nao esta aparecendo o resumo, mesmo que exista no frontmatter
 const imagemUrl = noticia?.imagem
   ? `${base}${noticia.imagem.replace(/^\//, '')}`
   : null;
@@ -105,9 +106,9 @@ const imagemUrl = noticia?.imagem
           </h1>
 
           {/* Resumo: Estilo "Excerto Datilografado" */}
-          {noticia.resumo && (
+          {testeResumo && (
             <p class="mt-8 border-l-[3px] border-primary bg-background pl-5 pr-3 py-4 font-abstract text-lg italic leading-[1.7] text-text sm:text-xl">
-              {noticia.resumo}
+              {testeResumo}
             </p>
           )}
         </header>
