@@ -109,3 +109,42 @@ Resumo do que foi realizado:
 
 Verificação:
 - Executado `npm run build` com sucesso (código 0, 11 páginas estáticas geradas, incluindo `/contato/index.html`).
+
+
+
+# Log do agente: task 2 (migração da leitura de notícias para Astro Content Collections com Zod)
+
+Data: 2026-10-21
+Status: **CONCLUÍDO na branch `content-collections` (sem merge, sem push na `main`).**
+
+Resumo do que foi realizado:
+1. `package.json` e `package-lock.json`:
+   - Adicionado `@markdoc/markdoc` como dependência direta (`@astrojs/markdoc` já estava instalado e ativo em `astro.config.mjs` tanto em dev quanto em produção).
+2. `src/content.config.ts` e `keystatic.config.ts`:
+   - Criado `src/content.config.ts` definindo a coleção `noticias` com `glob` loader (`./src/content/noticias`, `*.mdoc`, preservando o nome do arquivo como `id`) e validação Zod (`titulo` obrigatório, `data` normalizada para `AAAA-MM-DD`, `resumo` e `imagem` opcionais normalizados para `string | null`).
+   - Adicionado comentário de cabeçalho em `keystatic.config.ts` apontando para a sincronia com `src/content.config.ts` e `.pages.yml`.
+3. `src/lib/noticias.ts`:
+   - Substituído `createReader` (`@keystatic/core/reader`) e o import de `keystatic.config.ts` por `getCollection`, `getEntry` e `CollectionEntry<'noticias'>` de `astro:content`.
+   - Removidas todas as asserções `as unknown as ...` e interfaces legadas (`NoticiaEntryData`, `MarkdocDocumentNode`, `NoticiaParaResumo`).
+   - Mantidas `listarNoticias`, `obterNoticia`, `gerarResumo` (extraindo texto via `Markdoc.parse(corpo)` quando `resumo` está vazio), `extrairTextoDeNo` e `formatarLimite160`.
+4. `src/pages/noticias/[slug].astro`:
+   - Substituída a renderização manual (`noticia.conteudo()` + `Markdoc.transform` + `Markdoc.renderers.html`) por `render(noticia.entry)` de `astro:content` e `<Content />`.
+5. `README.md`:
+   - Adicionada seção explicando onde mora o schema da notícia (`src/content.config.ts`, `keystatic.config.ts` e `.pages.yml`) e que `src/content.config.ts` valida o build.
+
+Verificação (Passo 8):
+1. `astro sync` + `tsc --noEmit` (TypeScript 5): zero erros.
+2. `npm run build` sem variáveis `KEYSTATIC_*`: código 0, 11 páginas geradas (6 páginas de notícias = 6 arquivos `.mdoc` em `src/content/noticias/`).
+3. Comparação de URLs e diff de HTML (`dist/` vs linha de base): lista de `index.html` idêntica (11 arquivos) e **0 diferenças de HTML** (todos os 11 arquivos `index.html` saíram idênticos byte a byte, pois `@astrojs/markdoc` também renderiza o corpo dentro de `<article><p>...</p></article>`).
+4. Teste negativo:
+   - Arquivo com `data: ontem` falhou o build com `[InvalidContentEntryDataError] noticias → _teste-data-invalida data does not match collection schema. data: use o formato AAAA-MM-DD` apontando o arquivo.
+   - Arquivo sem `titulo` falhou o build com `[InvalidContentEntryDataError] noticias → _teste-sem-titulo data does not match collection schema. titulo: Required` apontando o arquivo.
+   - Arquivos temporários removidos.
+5. Resumo e imagem: notícias sem `resumo` (`orcamento-participativo...`, `teste-de-noticia`) geram resumo automático a partir do corpo; notícias com `resumo` usam o texto manual; notícias com e sem `imagem` renderizam sem quebrar.
+6. `astro dev`: `/keystatic` respondeu 200 e criação de `.mdoc` temporário foi refletida imediatamente na rota da notícia em dev; arquivo removido em seguida.
+7. Busca por restos (`createReader`, `keystatic/reader`, `as unknown as`) em `src/`: zero ocorrências.
+
+Passos manuais do dono:
+1. Conferir o relatório de diferenças de HTML e abrir o site local (`astro preview`) em 2 ou 3 notícias antigas e numa nova.
+2. Criar uma notícia pelo Keystatic local e rodar o build para confirmar o fluxo completo.
+3. Fazer o merge na `main` e confirmar que o GitHub Actions publicou o site.

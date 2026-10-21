@@ -1,8 +1,19 @@
-// Utilitário para leitura e manipulação das notícias gerenciadas pelo Keystatic CMS.
+// Utilitário para leitura e manipulação das notícias via Astro Content Collections.
 // Fornece listagem cronológica, busca por slug e extração inteligente de resumo.
 
-import { createReader } from '@keystatic/core/reader';
-import keystaticConfig from '../../keystatic.config.ts';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import Markdoc from '@markdoc/markdoc';
+
+export type Noticia = CollectionEntry<'noticias'>;
+
+export interface NoticiaItem {
+  slug: string;
+  titulo: string;
+  data: string;
+  resumo: string | null;
+  imagem: string | null;
+  entry: Noticia;
+}
 
 // Interface estrutural para nós da árvore sintática do Markdoc
 interface MarkdocNodeChild {
@@ -14,40 +25,9 @@ interface MarkdocNodeChild {
   children?: MarkdocNodeChild[];
 }
 
-interface MarkdocDocumentNode {
-  type?: string;
-  children?: MarkdocNodeChild[];
-  [key: string]: unknown;
+function paraItem(entry: Noticia): NoticiaItem {
+  return { slug: entry.id, entry, ...entry.data };
 }
-
-export interface NoticiaEntryData {
-  titulo: string;
-  data: string;
-  resumo: string | null;
-  imagem: string | null;
-  conteudo: () => Promise<{ node: MarkdocDocumentNode }>;
-}
-
-export interface NoticiaItem extends NoticiaEntryData {
-  slug: string;
-  entry: NoticiaEntryData;
-}
-
-export type NoticiaParaResumo = {
-  resumo?: string | null;
-  conteudo?: (() => Promise<{ node: MarkdocDocumentNode }>) | { node: MarkdocDocumentNode } | unknown;
-  entry?: {
-    resumo?: string | null;
-    conteudo?: (() => Promise<{ node: MarkdocDocumentNode }>) | { node: MarkdocDocumentNode } | unknown;
-  };
-};
-
-// Leitor Keystatic configurado para ler os arquivos locais do repositório no site público,
-// evitando que tente se conectar à API do GitHub em produção para renderizar as páginas.
-export const reader = createReader(process.cwd(), {
-  ...keystaticConfig,
-  storage: { kind: 'local' },
-});
 
 /**
  * Percorre recursivamente a árvore do Markdoc extraindo os nós de texto.
@@ -102,16 +82,9 @@ function formatarLimite160(texto: string): string {
  * Lista todas as notícias cadastradas, ordenadas da mais recente para a mais antiga.
  */
 export async function listarNoticias(): Promise<NoticiaItem[]> {
-  const itens = await reader.collections.noticias.all();
-
-  // Ordena por data decrescente (formato ISO YYYY-MM-DD)
-  const ordenados = itens.sort((a, b) => b.entry.data.localeCompare(a.entry.data));
-
-  return ordenados.map((item) => ({
-    slug: item.slug,
-    entry: item.entry as unknown as NoticiaEntryData,
-    ...(item.entry as unknown as NoticiaEntryData),
-  }));
+  const entradas = await getCollection('noticias');
+  // A ordem de retorno de getCollection não é garantida pela API
+  return entradas.map(paraItem).sort((a, b) => b.data.localeCompare(a.data));
 }
 
 /**
@@ -119,45 +92,19 @@ export async function listarNoticias(): Promise<NoticiaItem[]> {
  * Retorna null caso a notícia não seja encontrada.
  */
 export async function obterNoticia(slug: string): Promise<NoticiaItem | null> {
-  const entry = await reader.collections.noticias.read(slug);
-  if (!entry) {
-    return null;
-  }
-
-  const entryData = entry as unknown as NoticiaEntryData;
-  return {
-    slug,
-    entry: entryData,
-    ...entryData,
-  };
+  const entry = await getEntry('noticias', slug);
+  return entry ? paraItem(entry) : null;
 }
 
 /**
  * Gera um resumo curto (máximo de aproximadamente 160 caracteres).
  * Utiliza o campo resumo se preenchido; caso contrário, extrai as primeiras frases do conteúdo.
  */
-export async function gerarResumo(noticia: NoticiaParaResumo): Promise<string> {
-  // Dá suporte tanto ao objeto direto quanto aninhado em entry
-  const resumoTexto = noticia.resumo ?? noticia.entry?.resumo;
-  if (resumoTexto && resumoTexto.trim().length > 0) {
-    return formatarLimite160(resumoTexto);
-  }
+export function gerarResumo(noticia: Pick<NoticiaItem, 'resumo' | 'entry'>): string {
+  const manual = noticia.resumo ?? noticia.entry.data.resumo;
+  if (manual && manual.trim().length > 0) return formatarLimite160(manual);
 
-  const conteudoRef = noticia.conteudo ?? noticia.entry?.conteudo;
-  if (!conteudoRef) {
-    return '';
-  }
-
-  let nodeRoot: unknown = null;
-  if (typeof conteudoRef === 'function') {
-    const markdocResolvido = await (conteudoRef as () => Promise<{ node: unknown }>)();
-    nodeRoot = markdocResolvido?.node;
-  } else if (typeof conteudoRef === 'object' && conteudoRef !== null && 'node' in conteudoRef) {
-    nodeRoot = (conteudoRef as { node: unknown }).node;
-  } else {
-    nodeRoot = conteudoRef;
-  }
-
-  const textoExtraido = extrairTextoDeNo(nodeRoot);
-  return formatarLimite160(textoExtraido);
+  const corpo = noticia.entry.body ?? '';
+  if (!corpo) return '';
+  return formatarLimite160(extrairTextoDeNo(Markdoc.parse(corpo)));
 }

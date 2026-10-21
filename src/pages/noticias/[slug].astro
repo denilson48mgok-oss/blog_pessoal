@@ -3,7 +3,7 @@
 import Base from '@/layouts/Base.astro';
 import { ownerData } from '@/data/owner_data';
 import { listarNoticias, obterNoticia, gerarResumo } from '@/lib/noticias';
-import Markdoc from '@markdoc/markdoc';
+import { render } from 'astro:content';
 import TextResizer from '@/components/TextResizer.astro';
 
 // Pré-renderizado no build: em produção, a função serverless não encontra src/content no disco.
@@ -39,18 +39,10 @@ const formatarDataCompleta = (dataIso: string): string => {
   }).format(dataObj);
 };
 
-let conteudoHtml = '';
-let metaDescricao = '';
-
-if (noticia) {
-  const markdocResultado = await noticia.conteudo();
-  if (markdocResultado?.node) {
-    const transformed = Markdoc.transform(markdocResultado.node);
-    conteudoHtml = Markdoc.renderers.html(transformed);
-  }
-  metaDescricao = noticia.resumo || (await gerarResumo(noticia));
-}
-
+const { Content } = noticia ? await render(noticia.entry) : { Content: null };
+const metaDescricao = noticia ? noticia.resumo || (await gerarResumo(noticia)) : '';
+const testeResumo = await gerarResumo(noticia); // para testar, já qeue o resumo nao esta aparecendo sem isso
+// TODO: ajustar a logica, já que usando noticia.resumo || (await gerarResumo(noticia)) nao esta aparecendo o resumo, mesmo que exista no frontmatter
 const imagemUrl = noticia?.imagem
   ? `${base}${noticia.imagem.replace(/^\//, '')}`
   : null;
@@ -108,15 +100,15 @@ const imagemUrl = noticia?.imagem
             </span>
 
           </div>
-
-          <h1 class="font-heading text-4xl font-bold leading-[1.15] text-heading sm:text-5xl lg:text-6xl">
+          {/* Título da Notícia */}
+          <h1 class="font-heading text-4xl font-bold leading-[1.15] text-heading sm:text-5xl lg:text-6xl break-all"> 
             {noticia.titulo}
           </h1>
 
           {/* Resumo: Estilo "Excerto Datilografado" */}
-          {noticia.resumo && (
+          {testeResumo && (
             <p class="mt-8 border-l-[3px] border-primary bg-background pl-5 pr-3 py-4 font-abstract text-lg italic leading-[1.7] text-text sm:text-xl">
-              {noticia.resumo}
+              {testeResumo}
             </p>
           )}
         </header>
@@ -138,7 +130,7 @@ const imagemUrl = noticia?.imagem
           </aside>
 
           <div class="conteudo-noticia article-content">
-            <Fragment set:html={conteudoHtml} />
+            {Content && <Content />}
           </div>
         </div>
 

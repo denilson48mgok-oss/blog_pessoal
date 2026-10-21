@@ -1,5 +1,6 @@
 // Configuração do Keystatic CMS para gerenciamento editorial da Revista Codorninha.
 // Define o modo de armazenamento e o schema da coleção de notícias.
+// Mantenha o schema em sincronia com src/content.config.ts (validação no build) e .pages.yml (se existir).
 import { config, collection, fields } from '@keystatic/core';
 
 // Modo local: o painel só existe no `astro dev`; em produção o site é estático.
