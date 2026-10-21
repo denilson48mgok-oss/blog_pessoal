@@ -36,3 +36,13 @@ A estrutura (campos) de cada notícia fica definida em até três arquivos que d
 - `src/content.config.ts`: define a Content Collection do Astro com Zod e é quem **valida os arquivos `.mdoc` durante o build** (apontando erro caso falte título ou a data esteja fora do formato `AAAA-MM-DD`).
 - `keystatic.config.ts`: define os campos exibidos no painel de edição local (`/keystatic` em `npm run dev`).
 - `.pages.yml` (se existir): define os campos para edição via Pages CMS.
+
+## Edição de conteúdo (Keystatic e Pages CMS)
+
+O arquivo `.pages.yml` na raiz do projeto serve exclusivamente para configurar o **Pages CMS** e não é consumido pelo Astro durante o build.
+
+- **Edição local (Keystatic):** rode `npm run dev`, acesse `http://localhost:4321/keystatic` e depois faça commit e push das alterações.
+- **Edição online (Pages CMS):** acesse `https://app.pagescms.org`, conecte sua conta GitHub com acesso ao repositório e edite as notícias pelo navegador (o Pages CMS salva direto no GitHub).
+
+**Atenção:** o Keystatic e o Pages CMS **editam os mesmos arquivos** em `src/content/noticias/` e salvam imagens em `public/uploads/noticias/`. Qualquer mudança no schema de um precisa ser refletida no outro (`keystatic.config.ts` ↔ `.pages.yml`), além de `src/content.config.ts`.
+
