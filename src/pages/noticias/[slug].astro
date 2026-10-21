@@ -3,7 +3,7 @@
 import Base from '@/layouts/Base.astro';
 import { ownerData } from '@/data/owner_data';
 import { listarNoticias, obterNoticia, gerarResumo } from '@/lib/noticias';
-import Markdoc from '@markdoc/markdoc';
+import { render } from 'astro:content';
 import TextResizer from '@/components/TextResizer.astro';
 
 // Pré-renderizado no build: em produção, a função serverless não encontra src/content no disco.
@@ -39,17 +39,8 @@ const formatarDataCompleta = (dataIso: string): string => {
   }).format(dataObj);
 };
 
-let conteudoHtml = '';
-let metaDescricao = '';
-
-if (noticia) {
-  const markdocResultado = await noticia.conteudo();
-  if (markdocResultado?.node) {
-    const transformed = Markdoc.transform(markdocResultado.node);
-    conteudoHtml = Markdoc.renderers.html(transformed);
-  }
-  metaDescricao = noticia.resumo || (await gerarResumo(noticia));
-}
+const { Content } = noticia ? await render(noticia.entry) : { Content: null };
+const metaDescricao = noticia ? noticia.resumo || (await gerarResumo(noticia)) : '';
 
 const imagemUrl = noticia?.imagem
   ? `${base}${noticia.imagem.replace(/^\//, '')}`
@@ -138,7 +129,7 @@ const imagemUrl = noticia?.imagem
           </aside>
 
           <div class="conteudo-noticia article-content">
-            <Fragment set:html={conteudoHtml} />
+            {Content && <Content />}
           </div>
         </div>
 
