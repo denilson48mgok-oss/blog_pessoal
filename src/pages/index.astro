@@ -84,7 +84,7 @@ const heroImagemUrl = temImagemFundo
     <div class="mb-8 flex items-end justify-between border-b border-border pb-4">
       <div>
         <h2 class="font-heading text-2xl sm:text-3xl font-bold text-heading">
-          Últimas notícias
+          Últimas publicações
         </h2>
         <p class="mt-1 text-sm text-textMuted">
           Acompanhe os acontecimentos mais recentes, análises e eventos locais.
@@ -94,14 +94,14 @@ const heroImagemUrl = temImagemFundo
         href={`${base}noticias/`}
         class="hidden sm:inline-flex items-center text-sm font-semibold text-primary hover:underline"
       >
-        Ver todas as notícias &rarr;
+        Ver todas as matérias &rarr;
       </a>
     </div>
     <!-- {`Seção de cards de notícias: exibe um card para cada notícia recente ou uma mensagem caso não haja notícias`} -->
     {
       noticiasCards.length === 0 ? (
         <div class="rounded-lg border border-dashed border-border p-12 text-center">
-          <p class="text-base text-textMuted">Nenhuma notícia publicada ainda</p>
+          <p class="text-base text-textMuted">Nenhuma matéria publicada ainda</p>
         </div>
       ) : (
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

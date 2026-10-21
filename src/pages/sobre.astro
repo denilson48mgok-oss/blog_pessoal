@@ -13,7 +13,7 @@ const base = import.meta.env.BASE_URL;
         Sobre <span class="text-primary">{ownerData.siteName}</span>
       </h1>
       <p class="text-lg sm:text-xl text-text mb-4">
-        {ownerData.sobre? ownerData.sobre : "A Revista Codorninha é uma publicação digital dedicada a fornecer informações, análises e insights sobre uma variedade de tópicos relevantes para nossos leitores."}
+        {ownerData.sobre ? ownerData.sobre : <><strong class="text-primary">{ownerData.siteName}</strong> é uma publicação digital dedicada a fornecer informações, análises e insights sobre uma variedade de tópicos relevantes para nossos leitores.</>}
       </p>
       <p class="text-lg sm:text-xl text-text mb-4">
         Fundada por entusiastas da comunicação e da informação, a revista busca promover o conhecimento e a cultura, abordando assuntos que vão desde ciência e tecnologia até arte e entretenimento.
