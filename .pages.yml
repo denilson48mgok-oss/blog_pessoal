@@ -32,6 +32,25 @@ content:
       - name: imagem
         label: Imagem de capa
         type: image
+      # Manter opções em sincronia com src/data/categorias.ts
+      - name: categorias
+        label: Categorias
+        type: select
+        default:
+          - noticia
+        options:
+          multiple: true
+          values:
+            - name: noticia
+              label: Notícia
+            - name: reflexao
+              label: Reflexão
+            - name: entrevista
+              label: Entrevista
+            - name: cronica
+              label: Crônica
+            - name: review
+              label: Review
       - name: body
         label: Conteúdo
         type: rich-text
