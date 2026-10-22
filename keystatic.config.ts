@@ -2,6 +2,7 @@
 // Define o modo de armazenamento e o schema da coleção de notícias.
 // Mantenha o schema em sincronia com src/content.config.ts (validação no build) e .pages.yml (se existir).
 import { config, collection, fields } from '@keystatic/core';
+import { CATEGORIAS_NOTICIAS } from '@/data/categorias';
 
 // Modo local: o painel só existe no `astro dev`; em produção o site é estático.
 export default config({
@@ -34,6 +35,12 @@ export default config({
           directory: 'public/uploads/noticias',
           publicPath: '/uploads/noticias/',
           description: 'Imagem principal da notícia salva em public/uploads/noticias.',
+        }),
+        categorias: fields.multiselect({
+          label: 'Categorias',
+          description: 'Categorias da notícia (opcional). Se omitido, a notícia não terá categoria.',
+          options: CATEGORIAS_NOTICIAS,
+          defaultValue: ['noticia']
         }),
         conteudo: fields.markdoc({
           label: 'Conteúdo',

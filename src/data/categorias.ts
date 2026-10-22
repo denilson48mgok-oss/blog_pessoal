@@ -18,6 +18,6 @@ export const CATEGORIAS_IDS = CATEGORIAS_NOTICIAS.map((c) => c.value) as
     ...CategoriaId[]
 ];
 
-export const CATEGORIA_LABEL_MAP = Record <string, string> = Object.fromEntries(
+export const CATEGORIA_LABEL_MAP: Record<string, string> = Object.fromEntries(
     CATEGORIAS_NOTICIAS.map((c) => [c.value, c.label])
 );
