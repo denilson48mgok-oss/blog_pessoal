@@ -2,6 +2,7 @@
 // Página de exibição de uma notícia individual da Revista Codorninha.
 import Base from '@/layouts/Base.astro';
 import { ownerData } from '@/data/owner_data';
+import { CATEGORIA_LABEL_MAP } from '@/data/categorias';
 import { listarNoticias, obterNoticia, gerarResumo } from '@/lib/noticias';
 import { render } from 'astro:content';
 import TextResizer from '@/components/TextResizer.astro';
@@ -98,7 +99,15 @@ const imagemUrl = noticia?.imagem
             <span class="text-xs font-semibold uppercase tracking-[0.1em] text-textMuted">
               {ownerData.siteName}
             </span>
-
+            {noticia.categorias.length > 0 && (
+              <div class="flex flex-wrap items-center gap-2">
+                {noticia.categorias.map((cat) => (
+                  <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    {CATEGORIA_LABEL_MAP[cat] ?? cat}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           {/* Título da Notícia */}
           <h1 class="font-heading text-4xl font-bold leading-[1.15] text-heading sm:text-5xl lg:text-6xl break-words"> 
