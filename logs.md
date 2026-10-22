@@ -148,3 +148,26 @@ Passos manuais do dono:
 1. Conferir o relatório de diferenças de HTML e abrir o site local (`astro preview`) em 2 ou 3 notícias antigas e numa nova.
 2. Criar uma notícia pelo Keystatic local e rodar o build para confirmar o fluxo completo.
 3. Fazer o merge na `main` e confirmar que o GitHub Actions publicou o site.
+
+
+
+# Log do agente: task 8 (implementação de categorias predefinidas nas matérias)
+
+Data: 2026-10-22
+Status: **CONCLUÍDO na branch `implementacao-categorias`.**
+
+Resumo do que foi realizado:
+1. `src/data/categorias.ts`, `src/content.config.ts` e `keystatic.config.ts` (realizados previamente pelo usuário):
+   - Criada a fonte única de categorias (`CATEGORIAS_NOTICIAS`, `CategoriaId`, `CATEGORIAS_IDS` e `CATEGORIA_LABEL_MAP`).
+   - Adicionado o campo `categorias` no schema Zod da coleção `noticias` com fallback para `[]`.
+   - Adicionado `fields.multiselect` de `categorias` no Keystatic.
+2. `.pages.yml`:
+   - Adicionado o campo `categorias` (`type: select`, `options.multiple: true`, `default: [noticia]`) com a lista estática de valores espelhando `src/data/categorias.ts`.
+3. `src/lib/noticias.ts`:
+   - Adicionada a propriedade `categorias: CategoriaId[]` na interface `NoticiaItem` e repassada em `paraItem` (`categorias: entry.data.categorias ?? []`) para `listarNoticias` e `obterNoticia`.
+4. `src/pages/noticias/[slug].astro`:
+   - Importado `CATEGORIA_LABEL_MAP` de `@/data/categorias`.
+   - Renderizadas as badges das categorias no cabeçalho da matéria (ao lado da data/nome do site) quando `noticia.categorias.length > 0`, utilizando o estilo `rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary`.
+
+Verificação:
+- Executados `npx astro sync` e `npm run build` com sucesso (código 0, 15 páginas estáticas geradas, incluindo matérias antigas sem `categorias` e matérias novas com `categorias`).
