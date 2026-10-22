@@ -1,5 +1,6 @@
 // Schema das notícias. Edição: Keystatic (dev) e Pages CMS (opcional).
 // Mantenha em sincronia com keystatic.config.ts e .pages.yml.
+import { CATEGORIAS_IDS } from "@/data/categorias"
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
@@ -29,6 +30,10 @@ const noticias = defineCollection({
     data: dataISO,
     resumo: textoOpcional,
     imagem: textoOpcional,
+    categorias: z
+    .array(z.enum(CATEGORIAS_IDS))
+    .nullish()
+    .transform((v) => v ?? []),
   }),
 });
 
