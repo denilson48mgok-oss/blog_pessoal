@@ -21,5 +21,5 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  trailingSlash: 'ignore',
+  trailingSlash: 'always',
 });
