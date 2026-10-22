@@ -3,6 +3,7 @@
 
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import Markdoc from '@markdoc/markdoc';
+import type { CategoriaId } from '@/data/categorias';
 
 export type Noticia = CollectionEntry<'noticias'>;
 
@@ -12,6 +13,7 @@ export interface NoticiaItem {
   data: string;
   resumo: string | null;
   imagem: string | null;
+  categorias: CategoriaId[];
   entry: Noticia;
 }
 
@@ -26,7 +28,12 @@ interface MarkdocNodeChild {
 }
 
 function paraItem(entry: Noticia): NoticiaItem {
-  return { slug: entry.id, entry, ...entry.data };
+  return {
+    slug: entry.id,
+    entry,
+    ...entry.data,
+    categorias: entry.data.categorias ?? [],
+  };
 }
 
 /**
