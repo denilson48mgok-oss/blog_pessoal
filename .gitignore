@@ -6,6 +6,7 @@ dist/
 tasks/
 agents.md
 logs.md
+agyignore.md
 
 # Variáveis de ambiente
 .env
