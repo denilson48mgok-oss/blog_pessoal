@@ -1,7 +1,8 @@
 name: Deploy no GitHub Pages
+
 on:
   push:
-    branches: [main]
+    branches: [blog-funcional]
   workflow_dispatch:
 
 permissions:
@@ -19,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: withastro/action@v3
+        with:
+          node-version: 22
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
